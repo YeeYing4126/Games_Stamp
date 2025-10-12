@@ -141,10 +141,9 @@ button:hover { background-color: #4a9858; }
     <span class="modal-close" id="closeModal">&times;</span>
     <h3 id="modalBoothName"></h3>
     <p id="modalBoothDesc"></p>
-    <button id="markVisitedBtn">Mark as Visited</button>
     <div class="stamp-circle" id="stampCircle"></div>
-    <audio id="stampSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
-     <p style="font-size:0.9em;color:#555;">Tap your device to the NFC tag to mark as visited</p>
+  <audio id="stampSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
+  <p id="nfcMessage" style="font-size:0.9em;color:#555;">Tap your device to the NFC tag to mark as visited</p>
   </div>
 </div>
 
@@ -215,12 +214,9 @@ async function openModal(booth){
   stampCircle.innerText = "";
   modal.style.display = "flex";
 
-  // Instruction
-  const nfcMessage = document.createElement("p");
-  nfcMessage.style.fontSize = "0.9em";
-  nfcMessage.style.color = "#555";
+  // Use existing NFC message element
+  const nfcMessage = document.getElementById("nfcMessage");
   nfcMessage.innerText = "Go to the booth and tap your device on the NFC tag to stamp!";
-  modal.querySelector(".modal-content").appendChild(nfcMessage);
 
   if ('NDEFReader' in window) {
     try {
@@ -229,7 +225,6 @@ async function openModal(booth){
       console.log("NFC scan started...");
 
       ndef.onreading = async (event) => {
-        // Read tag ID (assuming text record)
         let scannedTag = "";
         for(const record of event.message.records){
           const textDecoder = new TextDecoder(record.encoding || "utf-8");
@@ -237,7 +232,6 @@ async function openModal(booth){
         }
         console.log("NFC tag scanned:", scannedTag);
 
-        // Check if the scanned tag matches this booth
         if(scannedTag === booth.tagId){
           const boothIndex = booths.findIndex(b => b.name === booth.name);
           if(!userData.stamps.includes(boothIndex)){
@@ -249,14 +243,17 @@ async function openModal(booth){
             nfcMessage.innerText = "Booth stamped successfully!";
           }
         } else {
-          nfcMessage.innerText = "This stamp does not belong to this booth. Tap the correct booth.";
+          nfcMessage.innerText = "This Stamp does not belong to this booth. Tap the correct booth.";
         }
       };
     } catch(error) {
       console.error("Stamped failed:", error);
-      nfcMessage.innerText = "This stamp not available on this booth.";
+      nfcMessage.innerText = "Stamp not available on this booth.";
     }
-  } 
+  } else {
+    nfcMessage.innerText = "Web NFC is not supported on this device/browser.";
+  }
+}
   
 // Close modal
 closeModal.onclick = ()=> modal.style.display="none";
