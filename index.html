@@ -3,88 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Green Shift – Login</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f6f9f6;
-      color: #2e4d36;
-      text-align: center;
-      padding-top: 100px;
-    }
-    header {
-      background-color: #a7d7a9;
-      color: white;
-      font-size: 1.6em;
-      padding: 20px 0;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      left: 0;
-    }
-    button {
-      padding: 10px 18px;
-      border-radius: 8px;
-      border: none;
-      background-color: #60b66e;
-      color: white;
-      cursor: pointer;
-      margin: 10px;
-      font-size: 1em;
-    }
-    button:hover { background-color: #4a9858; }
-  </style>
-</head>
-<body>
-  <header>The Green Shift Journey</header>
-  <h2>Sign in to start your journey 🌿</h2>
-  <button id="googleLogin">Sign in with Google</button>
-  <button id="microsoftLogin">Sign in with Microsoft</button>
-  <button id="yahooLogin">Sign in with Yahoo</button>
-
+  <title>Start My Journey</title>
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      OAuthProvider,
-      signInWithPopup,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
+    // 🔥 Your Firebase config (replace with your actual values)
     const firebaseConfig = {
       apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
       authDomain: "sustainable12.firebaseapp.com",
+      databaseURL: "https://sustainable12-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "sustainable12",
-    };
+      storageBucket: "sustainable12.firebasestorage.app",
+      messagingSenderId: "905147566179",
+      appId: "1:905147566179:web:52e20f5afccd05166a1056",
+      measurementId: "G-HVNWTXWPH4"
+  };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // Redirect if already signed in
+    // Providers
+    const googleProvider = new GoogleAuthProvider();
+    const microsoftProvider = new OAuthProvider('microsoft.com');
+    const yahooProvider = new OAuthProvider('yahoo.com');
+
+    // When "Start My Journey" clicked
+    window.startJourney = async () => {
+      const providers = [googleProvider, microsoftProvider, yahooProvider];
+      let user = null;
+
+      for (const provider of providers) {
+        try {
+          const result = await signInWithPopup(auth, provider);
+          user = result.user;
+          break;
+        } catch (error) {
+          if (error.code !== 'auth/popup-closed-by-user') {
+            console.error(error);
+          }
+        }
+      }
+
+      if (user) {
+        window.location.href = "./journey.html"; // redirect
+      } else {
+        alert("Sign-in failed or canceled. Please try again.");
+      }
+    };
+
+    // Auto redirect if already signed in
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        window.location.href = "./journey.html";  // ✅ relative link
+        window.location.href = "./journey.html";
       }
     });
-
-    async function loginWith(provider) {
-      try {
-        await signInWithPopup(auth, provider);
-        window.location.href = "./journey.html";  // ✅ relative link
-
-      } catch (error) {
-        alert("Login failed: " + error.message);
-        console.error(error);
-      }
-    }
-
-    document.getElementById("googleLogin").onclick = () =>
-      loginWith(new GoogleAuthProvider());
-    document.getElementById("microsoftLogin").onclick = () =>
-      loginWith(new OAuthProvider("microsoft.com"));
-    document.getElementById("yahooLogin").onclick = () =>
-      loginWith(new OAuthProvider("yahoo.com"));
   </script>
+
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #a2c2e2, #f7d9d9);
+      font-family: "Poppins", sans-serif;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    button {
+      background: #4a90e2;
+      color: white;
+      font-size: 1.2rem;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #357ab8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Your Game Journey</h1>
+  <button onclick="startJourney()">Start My Journey</button>
 </body>
 </html>
