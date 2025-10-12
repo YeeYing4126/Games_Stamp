@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Journey – The Green Shift</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f6f9f6;
+      color: #2e4d36;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      background-color: #a7d7a9;
+      color: white;
+      text-align: center;
+      width: 100%;
+      padding: 20px 0;
+      font-size: 1.5em;
+      font-weight: 600;
+    }
+    .container {
+      max-width: 420px;
+      width: 100%;
+      margin: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .progress {
+      width: 100%;
+      background: #dcefdc;
+      border-radius: 12px;
+      height: 18px;
+      margin: 10px 0 20px 0;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: #60b66e;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    .booth {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f8f2;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+    .booth h4 { margin: 0; font-weight: 500; }
+    .stamp {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+    }
+    .stamped { background: #60b66e !important; }
+    button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      background-color: #60b66e;
+      color: white;
+      cursor: pointer;
+      margin: 6px;
+    }
+    button:hover { background-color: #4a9858; }
+  </style>
+</head>
+<body>
+  <header>My Journey</header>
+
+  <div class="container" id="mainApp">
+    <div id="progressText"></div>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    <div id="boothList"></div>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
+      authDomain: "sustainable12.firebaseapp.com",
+      projectId: "sustainable12",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const booths = [
+      "Booth 1 – Waste Sorting Challenge",
+      "Booth 2 – Sugar Shock Guess",
+      "Booth 3 – Eco Trivia Wheel",
+      "Booth 4 – TBD",
+      "Booth 5 – Create Your Mona Lisa",
+      "Booth 6 – Giant Monopoly",
+      "Booth 7 – Sponsor A",
+      "Booth 8 – Sponsor B",
+      "Booth 9 – Sponsor C"
+    ];
+
+    const boothList = document.getElementById("boothList");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+
+    let currentUser = null;
+    let userData = { stamps: [] };
+
+    async function renderBooths() {
+      boothList.innerHTML = "";
+      let stampedCount = userData.stamps.length;
+      booths.forEach((b, i) => {
+        const stamped = userData.stamps.includes(i);
+        boothList.innerHTML += `
+          <div class="booth">
+            <h4>${b}</h4>
+            <div class="stamp ${stamped ? 'stamped' : ''}" data-id="${i}">${stamped ? '✓' : ''}</div>
+          </div>`;
+      });
+      document.querySelectorAll(".stamp").forEach(el => {
+        el.addEventListener("click", async () => {
+          const id = parseInt(el.dataset.id);
+          if (!userData.stamps.includes(id)) {
+            userData.stamps.push(id);
+            await setDoc(doc(db, "users", currentUser.uid), userData);
+            renderBooths();
+            alert(`✅ You collected a new stamp!\nProgress: ${userData.stamps.length}/${booths.length}`);
+          }
+        });
+      });
+      let progress = Math.round((stampedCount / booths.length) * 100);
+      progressBar.style.width = progress + "%";
+      progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        const ref = doc(db, "users", user.uid);
+        const snap = await getDoc(ref);
+        userData = snap.exists() ? snap.data() : { stamps: [] };
+        renderBooths();
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    document.getElementById("logoutBtn").onclick = async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    };
+  </script>
+</body>
+</html>
