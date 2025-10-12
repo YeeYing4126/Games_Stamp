@@ -164,17 +164,17 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Booth data
+// Booth data with NFC tag IDs
 const booths = [
-  {name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins."},
-  {name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount."},
-  {name: "Eco Trivia Wheel", desc: "Spin the wheel and answer sustainability quiz questions."},
-  {name: "Eco-friendly vs Wasteful Quick Match", desc: "Match picture cards to eco-friendly or wasteful board."},
-  {name: "Trash Bowling", desc: "Roll the ball to knock down non-recyclable trash bottles."},
-  {name: "1-Minute Spot the Difference", desc: "Find energy-saving vs wasting actions in 1 minute."},
-  {name: "Sponsor A", desc: "Visit Sponsor Booth A."},
-  {name: "Sponsor B", desc: "Visit Sponsor Booth B."},
-  {name: "Sponsor C", desc: "Visit Sponsor Booth C."}
+  {name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", tagId: "TAG001"},
+  {name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", tagId: "TAG002"},
+  {name: "Eco Trivia Wheel", desc: "Spin the wheel and answer sustainability quiz questions.", tagId: "TAG003"},
+  {name: "Eco-friendly vs Wasteful Quick Match", desc: "Match picture cards to eco-friendly or wasteful board.", tagId: "TAG004"},
+  {name: "Trash Bowling", desc: "Roll the ball to knock down non-recyclable trash bottles.", tagId: "TAG005"},
+  {name: "1-Minute Spot the Difference", desc: "Find energy-saving vs wasting actions in 1 minute.", tagId: "TAG006"},
+  {name: "Sponsor A", desc: "Visit Sponsor Booth A.", tagId: "TAG007"},
+  {name: "Sponsor B", desc: "Visit Sponsor Booth B.", tagId: "TAG008"},
+  {name: "Sponsor C", desc: "Visit Sponsor Booth C.", tagId: "TAG009"}
 ];
 
 // DOM elements
@@ -219,10 +219,9 @@ async function openModal(booth){
   const nfcMessage = document.createElement("p");
   nfcMessage.style.fontSize = "0.9em";
   nfcMessage.style.color = "#555";
-  nfcMessage.innerText = "Go to the booth and get your digital stamp!";
+  nfcMessage.innerText = "Go to the booth and tap your device on the NFC tag to stamp!";
   modal.querySelector(".modal-content").appendChild(nfcMessage);
 
-  // NFC scanning
   if ('NDEFReader' in window) {
     try {
       const ndef = new NDEFReader();
@@ -230,26 +229,32 @@ async function openModal(booth){
       console.log("NFC scan started...");
 
       ndef.onreading = async (event) => {
-        let tagMessage = "";
+        // Read tag ID (assuming text record)
+        let scannedTag = "";
         for(const record of event.message.records){
-          const textDecoder = new TextDecoder();
-          tagMessage += textDecoder.decode(record.data);
+          const textDecoder = new TextDecoder(record.encoding || "utf-8");
+          scannedTag += textDecoder.decode(record.data);
         }
-        console.log("NFC tag detected:", tagMessage);
+        console.log("NFC tag scanned:", scannedTag);
 
-        const boothIndex = booths.findIndex(b => b.name === booth.name);
-        if(!userData.stamps.includes(boothIndex)){
-          userData.stamps.push(boothIndex);
-          await setDoc(doc(db,"users",currentUser.uid), userData);
-          stampCircle.innerText = "✓";
-          stampSound.play();
-          renderBooths();
-          nfcMessage.innerText = "Booth stamped successfully!";
+        // Check if the scanned tag matches this booth
+        if(scannedTag === booth.tagId){
+          const boothIndex = booths.findIndex(b => b.name === booth.name);
+          if(!userData.stamps.includes(boothIndex)){
+            userData.stamps.push(boothIndex);
+            await setDoc(doc(db,"users",currentUser.uid), userData);
+            stampCircle.innerText = "✓";
+            stampSound.play();
+            renderBooths();
+            nfcMessage.innerText = "Booth stamped successfully!";
+          }
+        } else {
+          nfcMessage.innerText = "This stamp does not belong to this booth. Tap the correct booth.";
         }
       };
     } catch(error) {
-      console.error("NFC scan failed:", error);
-      nfcMessage.innerText = "This Stamp not available on this booth.";
+      console.error("Stamped failed:", error);
+      nfcMessage.innerText = "NFC scan not available on this device/browser.";
     }
   } else {
     nfcMessage.innerText = "Web NFC is not supported on this device/browser.";
