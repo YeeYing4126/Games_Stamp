@@ -72,6 +72,7 @@
       try {
         await signInWithPopup(auth, provider);
         window.location.href = "./journey.html";  // ✅ relative link
+
       } catch (error) {
         alert("Login failed: " + error.message);
         console.error(error);
