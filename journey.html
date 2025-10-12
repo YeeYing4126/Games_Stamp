@@ -156,6 +156,10 @@ const booths = [
   {name: "Eco Trivia Wheel", desc: "Spin the wheel and answer sustainability quiz questions."},
   {name: "Eco-friendly vs Wasteful Quick Match", desc: "Match picture cards to eco-friendly or wasteful board."},
   {name: "Trash Bowling", desc: "Roll the ball to knock down non-recyclable trash bottles."},
+  {name: " 1 - Minute Spot the Difference", desc: "Compare two pictures and find which actions save or waste energy."},
+  {name: "Sponsors 3", desc: "Get your freebies!"},
+  {name: "Sponsors 2", desc: "Get your freebies!"},
+  {name: "Sponsors 1", desc: "Get your freebies!"},
 ];
 
 const boothList = document.getElementById("boothList");
@@ -197,7 +201,7 @@ function renderBooths(){
 function openModal(booth,index){
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerText = booth.desc;
-  stampMsg.textContent = "Place your stamp or fingers here";
+  stampMsg.textContent = "Place your stamp here!";
   modal.style.display = "flex";
 
   let activePointers = new Map();
@@ -206,7 +210,7 @@ function openModal(booth,index){
   function evaluateStamp(){
     const touches = activePointers.size;
     if(touches < minTouches){
-      stampMsg.textContent = 'Use multiple fingers or a stamp';
+      stampMsg.textContent = 'Complete the games to get the stamp!';
       if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
       return;
     }
