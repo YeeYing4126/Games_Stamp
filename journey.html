@@ -215,22 +215,26 @@ async function openModal(booth){
   stampCircle.innerText = "";
   modal.style.display = "flex";
 
-  // Show message that NFC tap is needed
+  // Instruction
   const nfcMessage = document.createElement("p");
   nfcMessage.style.fontSize = "0.9em";
   nfcMessage.style.color = "#555";
   nfcMessage.innerText = "Go to the booth and get your digital stamp!";
   modal.querySelector(".modal-content").appendChild(nfcMessage);
 
-  // Automatically mark as visited using NFC
+  // NFC scanning
   if ('NDEFReader' in window) {
     try {
       const ndef = new NDEFReader();
-      await ndef.scan(); // Start scanning
-      console.log("NFC scan started... Tap your device to the tag.");
+      await ndef.scan();
+      console.log("NFC scan started...");
 
       ndef.onreading = async (event) => {
-        const tagMessage = event.message.records.map(r => r.data).join(",");
+        let tagMessage = "";
+        for(const record of event.message.records){
+          const textDecoder = new TextDecoder();
+          tagMessage += textDecoder.decode(record.data);
+        }
         console.log("NFC tag detected:", tagMessage);
 
         const boothIndex = booths.findIndex(b => b.name === booth.name);
@@ -240,9 +244,6 @@ async function openModal(booth){
           stampCircle.innerText = "✓";
           stampSound.play();
           renderBooths();
-        }
-      };
-          // Optional: remove NFC message after stamping
           nfcMessage.innerText = "Booth stamped successfully!";
         }
       };
@@ -253,6 +254,7 @@ async function openModal(booth){
   } else {
     nfcMessage.innerText = "Web NFC is not supported on this device/browser.";
   }
+}
   
 // Close modal
 closeModal.onclick = ()=> modal.style.display="none";
