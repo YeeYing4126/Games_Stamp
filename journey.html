@@ -215,6 +215,13 @@ async function openModal(booth){
   stampCircle.innerText = "";
   modal.style.display = "flex";
 
+  // Show message that NFC tap is needed
+  const nfcMessage = document.createElement("p");
+  nfcMessage.style.fontSize = "0.9em";
+  nfcMessage.style.color = "#555";
+  nfcMessage.innerText = "Go to the booth and get your digital stamp!";
+  modal.querySelector(".modal-content").appendChild(nfcMessage);
+
   // Automatically mark as visited using NFC
   if ('NDEFReader' in window) {
     try {
@@ -223,11 +230,10 @@ async function openModal(booth){
       console.log("NFC scan started... Tap your device to the tag.");
 
       ndef.onreading = async (event) => {
-        const tagMessage = event.message.records.map(r => r.data).join(","); // optional: read tag data
+        const tagMessage = event.message.records.map(r => r.data).join(",");
         console.log("NFC tag detected:", tagMessage);
 
-        // Mark booth as visited
-        const boothIndex = booths.findIndex(b=>b.name===booth.name);
+        const boothIndex = booths.findIndex(b => b.name === booth.name);
         if(!userData.stamps.includes(boothIndex)){
           userData.stamps.push(boothIndex);
           await setDoc(doc(db,"users",currentUser.uid), userData);
@@ -236,15 +242,18 @@ async function openModal(booth){
           renderBooths();
         }
       };
+          // Optional: remove NFC message after stamping
+          nfcMessage.innerText = "Booth stamped successfully!";
+        }
+      };
     } catch(error) {
       console.error("NFC scan failed:", error);
-      alert("NFC scan not available on this device/browser.");
+      nfcMessage.innerText = "This Stamp not available on this booth.";
     }
   } else {
-    alert("Web NFC is not supported on this device/browser.");
+    nfcMessage.innerText = "Web NFC is not supported on this device/browser.";
   }
-}
-
+  
 // Close modal
 closeModal.onclick = ()=> modal.style.display="none";
 window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
