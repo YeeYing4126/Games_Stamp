@@ -106,21 +106,23 @@ button:hover { background-color: #4a9858; }
   cursor: pointer;
   font-weight: bold;
 }
-.stamp-circle {
-  width: 100px;
-  height: 100px;
-  border: 2px solid #60b66e;
-  border-radius: 50%;
+#stampStage {
+  width: 5cm;
+  height: 5cm;
+  border: 2px dashed #60b66e;
   margin: 20px auto;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 32px;
-  color: #60b66e;
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none;
-  -ms-user-select: none;
+  position: relative;
+  touch-action: none;
   user-select: none;
+}
+#stampMsg {
+  position: absolute;
+  text-align: center;
+  font-size: 1em;
+  color: #60b66e;
 }
 </style>
 </head>
@@ -132,7 +134,6 @@ button:hover { background-color: #4a9858; }
   <div id="progressText"></div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
   <div id="boothList"></div>
-  <button id="logoutBtn">Logout</button>
 </div>
 
 <!-- Booth Modal -->
@@ -141,42 +142,22 @@ button:hover { background-color: #4a9858; }
     <span class="modal-close" id="closeModal">&times;</span>
     <h3 id="modalBoothName"></h3>
     <p id="modalBoothDesc"></p>
-    <div class="stamp-circle" id="stampCircle"></div>
-  <audio id="stampSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
-  <p id="nfcMessage" style="font-size:0.9em;color:#555;">Tap your device to the NFC tag to mark as visited</p>
+    <div id="stampStage">
+      <span id="stampMsg">Place your stamp or fingers here</span>
+    </div>
+    <audio id="stampSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
   </div>
 </div>
 
-<script type="module">
-// ✅ Firebase imports (v12.4.0)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-
-// 🔥 Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
-  authDomain: "sustainable12.firebaseapp.com",
-  projectId: "sustainable12",
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Booth data with NFC tag IDs
+<script>
 const booths = [
-  {name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", tagId: "TAG001"},
-  {name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", tagId: "TAG002"},
-  {name: "Eco Trivia Wheel", desc: "Spin the wheel and answer sustainability quiz questions.", tagId: "TAG003"},
-  {name: "Eco-friendly vs Wasteful Quick Match", desc: "Match picture cards to eco-friendly or wasteful board.", tagId: "TAG004"},
-  {name: "Trash Bowling", desc: "Roll the ball to knock down non-recyclable trash bottles.", tagId: "TAG005"},
-  {name: "1-Minute Spot the Difference", desc: "Find energy-saving vs wasting actions in 1 minute.", tagId: "TAG006"},
-  {name: "Sponsor A", desc: "Visit Sponsor Booth A.", tagId: "TAG007"},
-  {name: "Sponsor B", desc: "Visit Sponsor Booth B.", tagId: "TAG008"},
-  {name: "Sponsor C", desc: "Visit Sponsor Booth C.", tagId: "TAG009"}
+  {name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins."},
+  {name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount."},
+  {name: "Eco Trivia Wheel", desc: "Spin the wheel and answer sustainability quiz questions."},
+  {name: "Eco-friendly vs Wasteful Quick Match", desc: "Match picture cards to eco-friendly or wasteful board."},
+  {name: "Trash Bowling", desc: "Roll the ball to knock down non-recyclable trash bottles."},
 ];
 
-// DOM elements
 const boothList = document.getElementById("boothList");
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
@@ -184,15 +165,20 @@ const modal = document.getElementById("boothModal");
 const closeModal = document.getElementById("closeModal");
 const modalBoothName = document.getElementById("modalBoothName");
 const modalBoothDesc = document.getElementById("modalBoothDesc");
-const markVisitedBtn = document.getElementById("markVisitedBtn");
-const stampCircle = document.getElementById("stampCircle");
+const stampStage = document.getElementById("stampStage");
+const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
 
-let currentUser = null;
 let userData = { stamps: [] };
+const targetDiameterMm = 27;
+const toleranceMm = 2;
+const stableTimeMs = 300;
+const minTouches = 2;
+const defaultPxPerMm = 96 / 25.4;
 
-// Render booths
-function renderBooths() {
+function pxToMm(px){ return px / defaultPxPerMm; }
+
+function renderBooths(){
   boothList.innerHTML = "";
   let stampedCount = userData.stamps.length;
   booths.forEach((b,i)=>{
@@ -200,7 +186,7 @@ function renderBooths() {
     const div = document.createElement("div");
     div.className = "booth";
     div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped?'stamped':''}">${stamped?'✓':''}</div>`;
-    div.onclick = ()=>openModal(b);
+    div.onclick = ()=>openModal(b,i);
     boothList.appendChild(div);
   });
   let progress = Math.round((stampedCount / booths.length) * 100);
@@ -208,76 +194,81 @@ function renderBooths() {
   progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
 }
 
-async function openModal(booth){
+function openModal(booth,index){
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerText = booth.desc;
-  stampCircle.innerText = "";
+  stampMsg.textContent = "Place your stamp or fingers here";
   modal.style.display = "flex";
 
-  // Use existing NFC message element
-  const nfcMessage = document.getElementById("nfcMessage");
-  nfcMessage.innerText = "Go to the booth and tap your device on the NFC tag to stamp!";
+  let activePointers = new Map();
+  let stableTimer = null;
 
-  if ('NDEFReader' in window) {
-    try {
-      const ndef = new NDEFReader();
-      await ndef.scan();
-      console.log("NFC scan started...");
-
-      ndef.onreading = async (event) => {
-        let scannedTag = "";
-        for(const record of event.message.records){
-          const textDecoder = new TextDecoder(record.encoding || "utf-8");
-          scannedTag += textDecoder.decode(record.data);
-        }
-        console.log("NFC tag scanned:", scannedTag);
-
-        if(scannedTag === booth.tagId){
-          const boothIndex = booths.findIndex(b => b.name === booth.name);
-          if(!userData.stamps.includes(boothIndex)){
-            userData.stamps.push(boothIndex);
-            await setDoc(doc(db,"users",currentUser.uid), userData);
-            stampCircle.innerText = "✓";
-            stampSound.play();
-            renderBooths();
-            nfcMessage.innerText = "Booth stamped successfully!";
-          }
-        } else {
-          nfcMessage.innerText = "This Stamp does not belong to this booth. Tap the correct booth.";
-        }
-      };
-    } catch(error) {
-      console.error("Stamped failed:", error);
-      nfcMessage.innerText = "Stamp not available on this booth.";
+  function evaluateStamp(){
+    const touches = activePointers.size;
+    if(touches < minTouches){
+      stampMsg.textContent = 'Use multiple fingers or a stamp';
+      if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+      return;
     }
-  } else {
-    nfcMessage.innerText = "Stamp Here!";
+    const pts = Array.from(activePointers.values());
+    let maxd=0;
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx = pts[i].clientX - pts[j].clientX;
+        const dy = pts[i].clientY - pts[j].clientY;
+        const d = Math.hypot(dx,dy);
+        if(d>maxd) maxd=d;
+      }
+    }
+    const diameterMm = pxToMm(maxd);
+    const lower = targetDiameterMm-toleranceMm;
+    const upper = targetDiameterMm+toleranceMm;
+
+    if(diameterMm>=lower && diameterMm<=upper){
+      if(!stableTimer){
+        stableTimer = setTimeout(()=>{
+          userData.stamps.push(index);
+          stampSound.play();
+          stampMsg.textContent = "✅ Stamp successful!";
+          renderBooths();
+          stableTimer = null;
+        }, stableTimeMs);
+      } else {
+        stampMsg.textContent = "Hold steady...";
+      }
+    } else {
+      if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+      stampMsg.textContent = 'Stamp size not correct';
+    }
   }
+
+  stampStage.addEventListener('pointerdown', e=>{
+    stampStage.setPointerCapture && stampStage.setPointerCapture(e.pointerId);
+    activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
+    evaluateStamp();
+  });
+  stampStage.addEventListener('pointermove', e=>{
+    if(!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
+    evaluateStamp();
+  });
+  stampStage.addEventListener('pointerup', e=>{
+    activePointers.delete(e.pointerId);
+    if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+    evaluateStamp();
+  });
+  stampStage.addEventListener('pointercancel', e=>{
+    activePointers.delete(e.pointerId);
+    if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+    evaluateStamp();
+  });
 }
-  
-// Close modal
+
 closeModal.onclick = ()=> modal.style.display="none";
 window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
 
-
-// Logout
-document.getElementById("logoutBtn").onclick = async ()=>{
-  await signOut(auth);
-  window.location.href="index.html";
-}
-
-// Firebase auth
-onAuthStateChanged(auth, async user=>{
-  if(user){
-    currentUser = user;
-    const snap = await getDoc(doc(db,"users",user.uid));
-    userData = snap.exists() ? snap.data() : { stamps: [] };
-    renderBooths();
-  } else {
-    // Not logged in → redirect to index
-    window.location.href="index.html";
-  }
-});
+renderBooths();
 </script>
+
 </body>
 </html>
