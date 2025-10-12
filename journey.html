@@ -117,6 +117,9 @@ button:hover { background-color: #4a9858; }
   align-items: center;
   font-size: 32px;
   color: #60b66e;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
 </style>
@@ -145,11 +148,12 @@ button:hover { background-color: #4a9858; }
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+// ✅ Firebase imports (v12.4.0)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
-
-// 🔥 Your Firebase Config
+// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
   authDomain: "sustainable12.firebaseapp.com",
@@ -172,7 +176,7 @@ const booths = [
   {name: "Sponsor C", desc: "Visit Sponsor Booth C."}
 ];
 
-// DOM Elements
+// DOM elements
 const boothList = document.getElementById("boothList");
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
@@ -241,6 +245,7 @@ onAuthStateChanged(auth, async user=>{
     userData = snap.exists() ? snap.data() : { stamps: [] };
     renderBooths();
   } else {
+    // Not logged in → redirect to index
     window.location.href="index.html";
   }
 });
