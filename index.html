@@ -44,8 +44,13 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged } 
-      from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      OAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
@@ -56,23 +61,29 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // redirect if already signed in
-    onAuthStateChanged(auth, user => {
-      if (user) window.location.href = "journey.html";
+    // Redirect if already signed in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "./journey.html";  // ✅ relative link
+      }
     });
 
-    document.getElementById("googleLogin").onclick = async () => {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-      window.location.href = "journey.html";
-    };
-    document.getElementById("microsoftLogin").onclick = async () => {
-      await signInWithPopup(auth, new OAuthProvider("microsoft.com"));
-      window.location.href = "journey.html";
-    };
-    document.getElementById("yahooLogin").onclick = async () => {
-      await signInWithPopup(auth, new OAuthProvider("yahoo.com"));
-      window.location.href = "journey.html";
-    };
+    async function loginWith(provider) {
+      try {
+        await signInWithPopup(auth, provider);
+        window.location.href = "./journey.html";  // ✅ relative link
+      } catch (error) {
+        alert("Login failed: " + error.message);
+        console.error(error);
+      }
+    }
+
+    document.getElementById("googleLogin").onclick = () =>
+      loginWith(new GoogleAuthProvider());
+    document.getElementById("microsoftLogin").onclick = () =>
+      loginWith(new OAuthProvider("microsoft.com"));
+    document.getElementById("yahooLogin").onclick = () =>
+      loginWith(new OAuthProvider("yahoo.com"));
   </script>
 </body>
 </html>
