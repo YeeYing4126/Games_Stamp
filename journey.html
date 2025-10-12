@@ -144,6 +144,7 @@ button:hover { background-color: #4a9858; }
     <button id="markVisitedBtn">Mark as Visited</button>
     <div class="stamp-circle" id="stampCircle"></div>
     <audio id="stampSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
+     <p style="font-size:0.9em;color:#555;">Tap your device to the NFC tag to mark as visited</p>
   </div>
 </div>
 
@@ -208,28 +209,46 @@ function renderBooths() {
   progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
 }
 
-// Open modal
-function openModal(booth){
+async function openModal(booth){
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerText = booth.desc;
   stampCircle.innerText = "";
   modal.style.display = "flex";
 
-  markVisitedBtn.onclick = async ()=>{
-    const boothIndex = booths.findIndex(b=>b.name===booth.name);
-    if(!userData.stamps.includes(boothIndex)){
-      userData.stamps.push(boothIndex);
-      await setDoc(doc(db,"users",currentUser.uid), userData);
-      stampCircle.innerText = "✓";
-      stampSound.play();
-      renderBooths();
+  // Automatically mark as visited using NFC
+  if ('NDEFReader' in window) {
+    try {
+      const ndef = new NDEFReader();
+      await ndef.scan(); // Start scanning
+      console.log("NFC scan started... Tap your device to the tag.");
+
+      ndef.onreading = async (event) => {
+        const tagMessage = event.message.records.map(r => r.data).join(","); // optional: read tag data
+        console.log("NFC tag detected:", tagMessage);
+
+        // Mark booth as visited
+        const boothIndex = booths.findIndex(b=>b.name===booth.name);
+        if(!userData.stamps.includes(boothIndex)){
+          userData.stamps.push(boothIndex);
+          await setDoc(doc(db,"users",currentUser.uid), userData);
+          stampCircle.innerText = "✓";
+          stampSound.play();
+          renderBooths();
+        }
+      };
+    } catch(error) {
+      console.error("NFC scan failed:", error);
+      alert("NFC scan not available on this device/browser.");
     }
+  } else {
+    alert("Web NFC is not supported on this device/browser.");
   }
 }
 
 // Close modal
 closeModal.onclick = ()=> modal.style.display="none";
 window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
+
 
 // Logout
 document.getElementById("logoutBtn").onclick = async ()=>{
