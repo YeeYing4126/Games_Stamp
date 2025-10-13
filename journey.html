@@ -249,7 +249,7 @@ async function saveProgress() {
 
 function renderBooths() {
   boothList.innerHTML = "";
-  let stampedCount = userData.stamps.length;
+  let stampedCount = [...new Set(userData.stamps)].length;
   
   booths.forEach((b,i)=>{
     const stamped = userData.stamps.includes(i);
@@ -325,11 +325,14 @@ function openModal(booth,index){
     if(diameterMm>=lower && diameterMm<=upper){
       if(!stableTimer){
         stableTimer = setTimeout(()=>{
-          userData.stamps.push(index);
-          saveProgress();
-          stampSound.play();
-          stampMsg.textContent = "✅ Stamp successful!";
-          renderBooths();
+          if (!userData.stamps.includes(index)) {
+              userData.stamps.push(index);
+              userData.stamps = [...new Set(userData.stamps)]; // ensure uniqueness
+              saveProgress();
+              stampSound.play();
+              stampMsg.textContent = "✅ Stamp successful!";
+              renderBooths();
+              }
           stableTimer = null;
         }, stableTimeMs);
       } else {
