@@ -180,6 +180,20 @@ header {
   <div id="boothList"></div>
 </div>
 
+<!-- Booth Modal -->
+<div class="modal" id="boothModal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeModal">&times;</span>
+    <h3 id="modalBoothName"></h3>
+    <p id="modalBoothDesc"></p>
+    <div id="stampStage">
+      <span id="stampMsg">Place your stamp here</span>
+    </div>
+    <audio id="stampSound" src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/Revibe.mp3" preload="auto"></audio>
+  </div>
+</div>
+
+<script>
 <script type="module">
    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -197,21 +211,7 @@ header {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-<!-- Booth Modal -->
-<div class="modal" id="boothModal">
-  <div class="modal-content">
-    <span class="modal-close" id="closeModal">&times;</span>
-    <h3 id="modalBoothName"></h3>
-    <p id="modalBoothDesc"></p>
-    <div id="stampStage">
-      <span id="stampMsg">Place your stamp here</span>
-    </div>
-    <audio id="stampSound" src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/Revibe.mp3" preload="auto"></audio>
-  </div>
-</div>
-
-<script>
+  
 const booths = [
   { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
   { name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", type: "game" },
@@ -234,8 +234,6 @@ const modalBoothDesc = document.getElementById("modalBoothDesc");
 const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
-
-let userData = JSON.parse(localStorage.getItem("journeyProgress")) || { stamps: [] };
 
 const targetDiameterMm = 27;
 const toleranceMm = 2;
@@ -267,6 +265,27 @@ function renderBooths() {
   progressBar.style.width = progress + "%";
   progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
 }
+
+let userData = { stamps: [] };
+let currentUser = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    const docRef = doc(db, "journeys", user.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      userData = docSnap.data();
+    } else {
+      userData = { stamps: [] };
+      await setDoc(docRef, userData);
+    }
+    renderBooths();
+  } else {
+    alert("Please sign in first.");
+    window.location.href = "index.html";
+  }
+});
 
 function openModal(booth,index){
   modalBoothName.innerText = booth.name;
