@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Journey – The Green Shift</title>
+<title>My Journey – Re:vibe</title>
 <style>
 body {
   font-family: 'Poppins', sans-serif;
@@ -180,6 +180,24 @@ header {
   <div id="boothList"></div>
 </div>
 
+<script type="module">
+   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+ const firebaseConfig = {
+   apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
+   authDomain: "sustainable12.firebaseapp.com",
+   projectId: "sustainable12",
+   storageBucket: "sustainable12.appspot.com",
+   messagingSenderId: "905147566179",
+   appId: "1:905147566179:web:52e20f5afccd05166a1056" 
+ };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
 <!-- Booth Modal -->
 <div class="modal" id="boothModal">
   <div class="modal-content">
@@ -226,8 +244,10 @@ const minTouches = 4; // 👈 Require at least 4 contact points (not just 2 fing
 const defaultPxPerMm = 96 / 25.4;
 function pxToMm(px){ return px / defaultPxPerMm; }
 
-function saveProgress() {
-  localStorage.setItem("journeyProgress", JSON.stringify(userData));
+async function saveProgress() {
+  if (!currentUser) return;
+  const docRef = doc(db, "journeys", currentUser.uid);
+  await setDoc(docRef, userData);
 }
 
 function renderBooths() {
@@ -324,7 +344,6 @@ function openModal(booth,index){
 closeModal.onclick = ()=> modal.style.display="none";
 window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
 
-renderBooths();
 </script>
 
 </body>
