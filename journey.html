@@ -193,25 +193,24 @@ header {
   </div>
 </div>
 
-<script>
 <script type="module">
-   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
- const firebaseConfig = {
-   apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
-   authDomain: "sustainable12.firebaseapp.com",
-   projectId: "sustainable12",
-   storageBucket: "sustainable12.appspot.com",
-   messagingSenderId: "905147566179",
-   appId: "1:905147566179:web:52e20f5afccd05166a1056" 
- };
+const firebaseConfig = {
+  apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
+  authDomain: "sustainable12.firebaseapp.com",
+  projectId: "sustainable12",
+  storageBucket: "sustainable12.appspot.com",
+  messagingSenderId: "905147566179",
+  appId: "1:905147566179:web:52e20f5afccd05166a1056" 
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-  
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 const booths = [
   { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
   { name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", type: "game" },
@@ -238,7 +237,7 @@ const stampSound = document.getElementById("stampSound");
 const targetDiameterMm = 27;
 const toleranceMm = 2;
 const stableTimeMs = 300;
-const minTouches = 4; // 👈 Require at least 4 contact points (not just 2 fingers)
+const minTouches = 4;
 const defaultPxPerMm = 96 / 25.4;
 function pxToMm(px){ return px / defaultPxPerMm; }
 
@@ -286,7 +285,7 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
   }
 });
-
+  
 function openModal(booth,index){
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerText = booth.desc;
@@ -318,6 +317,7 @@ function openModal(booth,index){
         if(d>maxd) maxd=d;
       }
     }
+    
     const diameterMm = pxToMm(maxd);
     const lower = targetDiameterMm-toleranceMm;
     const upper = targetDiameterMm+toleranceMm;
@@ -326,7 +326,7 @@ function openModal(booth,index){
       if(!stableTimer){
         stableTimer = setTimeout(()=>{
           userData.stamps.push(index);
-          saveProgress(); // ✅ Save to localStorage
+          saveProgress();
           stampSound.play();
           stampMsg.textContent = "✅ Stamp successful!";
           renderBooths();
@@ -340,8 +340,8 @@ function openModal(booth,index){
       stampMsg.textContent = 'Stamp size not correct';
     }
   }
-
-  stampStage.onpointerdown = e=>{
+  
+    stampStage.onpointerdown = e=>{
     activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
     evaluateStamp();
   };
@@ -359,11 +359,10 @@ function openModal(booth,index){
     if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
   };
 }
-
+  
 closeModal.onclick = ()=> modal.style.display="none";
 window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
-
 </script>
-
+  
 </body>
 </html>
