@@ -4,6 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Journey – The Green Shift</title>
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+    // 🔥 Your Firebase config (replace with your actual values)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
+      authDomain: "sustainable12.firebaseapp.com",
+      projectId: "sustainable12",
+      storageBucket: "sustainable12.firebasestorage.app",
+      messagingSenderId: "905147566179",
+      appId: "1:905147566179:web:52e20f5afccd05166a1056",
+  };
+
+    // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+    
 <style>
 body {
   font-family: 'Poppins', sans-serif;
@@ -217,7 +238,27 @@ const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
 
-let userData = JSON.parse(localStorage.getItem("journeyProgress")) || { stamps: [] };
+let userData = { stamps: [] };
+let currentUser = null;
+
+// 👇 When user is logged in, load their progress
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    const docRef = doc(db, "journeys", user.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      userData = docSnap.data();
+    } else {
+      userData = { stamps: [] };
+      await setDoc(docRef, userData); // create if new
+    }
+    renderBooths();
+  } else {
+    alert("Please sign in first.");
+    window.location.href = "index.html";
+  }
+});
 
 const targetDiameterMm = 27;
 const toleranceMm = 2;
@@ -226,8 +267,10 @@ const minTouches = 4; // 👈 Require at least 4 contact points (not just 2 fing
 const defaultPxPerMm = 96 / 25.4;
 function pxToMm(px){ return px / defaultPxPerMm; }
 
-function saveProgress() {
-  localStorage.setItem("journeyProgress", JSON.stringify(userData));
+async function saveProgress() {
+  if (!currentUser) return;
+  const docRef = doc(db, "journeys", currentUser.uid);
+  await setDoc(docRef, userData);
 }
 
 function renderBooths() {
@@ -254,10 +297,10 @@ function openModal(booth,index){
   stampMsg.textContent = "Place your stamp here!";
   modal.style.display = "flex";
 
-  if (userData.stamps.includes(index)) {
-    stampMsg.textContent = "✅ Already stamped!";
-    return;
-  }
+if (userData.stamps.includes(index)) {
+  stampMsg.textContent = "✅ Already stamped!";
+  return;
+}
 
   let activePointers = new Map();
   let stableTimer = null;
@@ -287,7 +330,7 @@ function openModal(booth,index){
       if(!stableTimer){
         stableTimer = setTimeout(()=>{
           userData.stamps.push(index);
-          saveProgress(); // ✅ Save to localStorage
+          saveProgress(); // ✅ Save to Firebase
           stampSound.play();
           stampMsg.textContent = "✅ Stamp successful!";
           renderBooths();
