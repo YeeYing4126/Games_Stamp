@@ -195,54 +195,15 @@ header {
 
 <script>
 const booths = [
-  {
-    name: "Waste Sorting Challenge",
-    desc: "Sort waste cards into Recyclable, Organic, or General bins.",
-    type: "game"
-  },
-  {
-    name: "Sugar Shock Guess",
-    desc: "Guess sugar in a soft drink then reveal actual amount.",
-    type: "game"
-  },
-  {
-    name: "Eco Monopoly",
-    desc: "Roll the dice, answer questions, and complete sustainable challenges to move forward.",
-    type: "game"
-  },
-  {
-    name: "Sponsors 1",
-    desc: "🎁 Redeem a small gift after completing 3 game booths!",
-    type: "sponsor",
-    locked: true
-  },
-  {
-    name: "DIY Phone Holder / Lifestyle Deco Item",
-    desc: "Reuse discarded materials to craft a phone holder or lifestyle decorative item.",
-    type: "game"
-  },
-  {
-    name: "Trash Bowling",
-    desc: "Roll the ball to knock down non-recyclable trash bottles.",
-    type: "game"
-  },
-  {
-    name: "Sponsors 2",
-    desc: "🎁 Redeem a small gift after completing 5 game booths!",
-    type: "sponsor",
-    locked: true
-  },
-  {
-    name: "Create Your Own Monalisa",
-    desc: "Use an egg tray carton to paint and create your favorite patterns.",
-    type: "game"
-  },
-  {
-    name: "Sponsors 3",
-    desc: "🎁 Redeem a special gift after completing all 6 game booths!",
-    type: "sponsor",
-    locked: true
-  }
+  { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
+  { name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", type: "game" },
+  { name: "Eco Monopoly", desc: "Roll the dice, answer questions, and complete sustainable challenges to move forward.", type: "game" },
+  { name: "Sponsors 1", desc: "🎁 Redeem a small gift after completing 3 game booths!", type: "sponsor", locked: true },
+  { name: "DIY Phone Holder / Lifestyle Deco Item", desc: "Reuse discarded materials to craft a phone holder or lifestyle decorative item.", type: "game" },
+  { name: "Trash Bowling", desc: "Roll the ball to knock down non-recyclable trash bottles.", type: "game" },
+  { name: "Sponsors 2", desc: "🎁 Redeem a small gift after completing 5 game booths!", type: "sponsor", locked: true },
+  { name: "Create Your Own Monalisa", desc: "Use an egg tray carton to paint and create your favorite patterns.", type: "game" },
+  { name: "Sponsors 3", desc: "🎁 Redeem a special gift after completing all 6 game booths!", type: "sponsor", locked: true }
 ];
 
 const boothList = document.getElementById("boothList");
@@ -256,18 +217,23 @@ const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
 
-let userData = { stamps: [] };
+let userData = JSON.parse(localStorage.getItem("journeyProgress")) || { stamps: [] };
+
 const targetDiameterMm = 27;
 const toleranceMm = 2;
 const stableTimeMs = 300;
-const minTouches = 2;
+const minTouches = 4; // 👈 Require at least 4 contact points (not just 2 fingers)
 const defaultPxPerMm = 96 / 25.4;
-
 function pxToMm(px){ return px / defaultPxPerMm; }
 
-function renderBooths(){
+function saveProgress() {
+  localStorage.setItem("journeyProgress", JSON.stringify(userData));
+}
+
+function renderBooths() {
   boothList.innerHTML = "";
   let stampedCount = userData.stamps.length;
+  
   booths.forEach((b,i)=>{
     const stamped = userData.stamps.includes(i);
     const div = document.createElement("div");
@@ -276,6 +242,7 @@ function renderBooths(){
     div.onclick = ()=>openModal(b,i);
     boothList.appendChild(div);
   });
+  
   let progress = Math.round((stampedCount / booths.length) * 100);
   progressBar.style.width = progress + "%";
   progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
@@ -287,13 +254,18 @@ function openModal(booth,index){
   stampMsg.textContent = "Place your stamp here!";
   modal.style.display = "flex";
 
+  if (userData.stamps.includes(index)) {
+    stampMsg.textContent = "✅ Already stamped!";
+    return;
+  }
+
   let activePointers = new Map();
   let stableTimer = null;
 
   function evaluateStamp(){
     const touches = activePointers.size;
     if(touches < minTouches){
-      stampMsg.textContent = 'Complete the games to get the stamp!';
+      stampMsg.textContent = 'Use the official stamp chop!';
       if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
       return;
     }
@@ -315,6 +287,7 @@ function openModal(booth,index){
       if(!stableTimer){
         stableTimer = setTimeout(()=>{
           userData.stamps.push(index);
+          saveProgress(); // ✅ Save to localStorage
           stampSound.play();
           stampMsg.textContent = "✅ Stamp successful!";
           renderBooths();
@@ -329,26 +302,23 @@ function openModal(booth,index){
     }
   }
 
-  stampStage.addEventListener('pointerdown', e=>{
-    stampStage.setPointerCapture && stampStage.setPointerCapture(e.pointerId);
+  stampStage.onpointerdown = e=>{
     activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
     evaluateStamp();
-  });
-  stampStage.addEventListener('pointermove', e=>{
+  };
+  stampStage.onpointermove = e=>{
     if(!activePointers.has(e.pointerId)) return;
     activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
     evaluateStamp();
-  });
-  stampStage.addEventListener('pointerup', e=>{
+  };
+  stampStage.onpointerup = e=>{
     activePointers.delete(e.pointerId);
     if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
-    evaluateStamp();
-  });
-  stampStage.addEventListener('pointercancel', e=>{
+  };
+  stampStage.onpointercancel = e=>{
     activePointers.delete(e.pointerId);
     if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
-    evaluateStamp();
-  });
+  };
 }
 
 closeModal.onclick = ()=> modal.style.display="none";
