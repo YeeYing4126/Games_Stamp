@@ -306,22 +306,8 @@ function checkUnlocks() {
   saveProgress();
   return unlockedSponsors;
 }
-  
-  booths.forEach((b,i)=>{
-    const stamped = userData.stamps.includes(i);
-    const div = document.createElement("div");
-    div.className = "booth";
-    div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped?'stamped':''}">${stamped?'✓':''}</div>`;
-    div.onclick = ()=>openModal(b,i);
-    boothList.appendChild(div);
-  });
-  
-  let progress = Math.round((stampedCount / booths.length) * 100);
-  progressBar.style.width = progress + "%";
-  progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
-}
 
-let userData = { stamps: [], unlockedSponsors: [], lastUnlockThreshold: 0 };
+userData = { stamps: [] };
 let currentUser = null;
 
 onAuthStateChanged(auth, async (user) => {
@@ -332,7 +318,7 @@ onAuthStateChanged(auth, async (user) => {
     if (docSnap.exists()) {
       userData = docSnap.data();
     } else {
-      userData = { stamps: [] };
+      userData = { stamps: [], unlockedSponsors: [], lastUnlockThreshold: 0 };
       await setDoc(docRef, userData);
     }
     renderBooths();
