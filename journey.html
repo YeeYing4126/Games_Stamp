@@ -307,7 +307,7 @@ function checkUnlocks() {
   return unlockedSponsors;
 }
 
-userData = { stamps: [] };
+userData = { stamps: [], unlockedSponsors: [], lastUnlockThreshold: 0 };
 let currentUser = null;
 
 onAuthStateChanged(auth, async (user) => {
