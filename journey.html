@@ -249,7 +249,63 @@ async function saveProgress() {
 
 function renderBooths() {
   boothList.innerHTML = "";
+  const unlockedSponsors = checkUnlocks();
+  const sponsorIndexes = [3,6,8];
+  
   let stampedCount = [...new Set(userData.stamps)].length;
+  
+  booths.forEach((b,i)=>{
+    const stamped = userData.stamps.includes(i);
+    const isSponsor = sponsorIndexes.includes(i);
+    const locked = isSponsor && !unlockedSponsors.includes(i);
+
+    const div = document.createElement("div");
+    div.className = "booth";
+    div.innerHTML = `
+      <h4>${b.name}</h4>
+      <div class="stamp ${stamped?'stamped':''}">${stamped?'✓':''}</div>
+      ${locked ? '<div style="position:absolute;inset:0;background:rgba(255,255,255,0.7);border-radius:18px;display:flex;align-items:center;justify-content:center;color:#aaa;font-weight:600;">🔒 Locked</div>' : ''}
+    `;
+    if (!locked) div.onclick = ()=>openModal(b,i);
+    boothList.appendChild(div);
+  });
+  
+  let progress = Math.round((stampedCount / booths.length) * 100);
+  progressBar.style.width = progress + "%";
+  progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
+}
+
+function checkUnlocks() {
+  const gameIndexes = [0,1,2,4,5,7];
+  const sponsorIndexes = [3,6,8];
+
+  const gameCount = userData.stamps.filter(i => gameIndexes.includes(i)).length;
+  let unlockedSponsors = userData.unlockedSponsors || [];
+
+  // Unlock condition 1: 3 or more game booths
+  if (gameCount >= 3 && unlockedSponsors.length === 0) {
+    unlockedSponsors = sponsorIndexes.slice(); // unlock all
+  }
+
+  // If user stamped a sponsor, re-lock the rest until 2 more total stamps
+  const stampedSponsor = userData.stamps.find(i => sponsorIndexes.includes(i));
+  if (stampedSponsor != null) {
+    const totalStamps = userData.stamps.length;
+    const lastUnlockThreshold = userData.lastUnlockThreshold || 0;
+
+    // if they stamped a sponsor and this is a new stage
+    if (totalStamps < lastUnlockThreshold + 2) {
+      unlockedSponsors = [stampedSponsor]; // only the one they used
+    } else if (totalStamps >= lastUnlockThreshold + 2) {
+      unlockedSponsors = sponsorIndexes.slice(); // unlock again
+      userData.lastUnlockThreshold = totalStamps;
+    }
+  }
+
+  userData.unlockedSponsors = unlockedSponsors;
+  saveProgress();
+  return unlockedSponsors;
+}
   
   booths.forEach((b,i)=>{
     const stamped = userData.stamps.includes(i);
@@ -265,7 +321,7 @@ function renderBooths() {
   progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
 }
 
-let userData = { stamps: [] };
+let userData = { stamps: [], unlockedSponsors: [], lastUnlockThreshold: 0 };
 let currentUser = null;
 
 onAuthStateChanged(auth, async (user) => {
