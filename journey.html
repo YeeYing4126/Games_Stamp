@@ -291,7 +291,6 @@ function updateBoothLocks() {
     .map((b, i) => (b.type === "sponsor" ? i : null))
     .filter(i => i !== null);
 
-  // ✅ Add this line (missing before)
   const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
 
   // Step 1: Lock all sponsors by default
@@ -314,18 +313,18 @@ function updateBoothLocks() {
 
   // === Stage 4: After 5 games ===
   if (gameCount >= 5 && gameCount < 6) {
-    sponsorIndexes.forEach(i => {
-      if (!userData.stamps.includes(i)) booths[i].locked = false;
-    });
-    return;
-  }
-
-  // === Stage 5: After 5 games and a new sponsor stamped again ===
-  if (gameCount >= 5 && gameCount < 6 && stampedSponsors.length >= 1) {
+    if (stampedSponsors.length === 0) {
+      // unlock all remaining sponsors first
+      sponsorIndexes.forEach(i => {
+        if (!userData.stamps.includes(i)) booths[i].locked = false;
+      });
+  } else {
+    // if any sponsor has been stamped again, only keep that one open
     const latestStamped = stampedSponsors[stampedSponsors.length - 1];
     sponsorIndexes.forEach(i => (booths[i].locked = i !== latestStamped));
-    return;
   }
+  return;
+}
 
   // === Stage 6: After all 6 games ===
   if (gameCount >= 6) {
