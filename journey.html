@@ -297,9 +297,6 @@ function updateBoothLocks() {
   // Step 2: Find which sponsor (if any) has been stamped
   const stampedSponsorIndex = sponsorIndexes.find(i => userData.stamps.includes(i));
 
-  // === Stage 1: Before 3 games ===
-  if (gameCount < 3) return;
-
   // === Stage 2: After 3 games but before any sponsor stamp ===
   if (gameCount >= 3 && stampedSponsors.length === 0) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
