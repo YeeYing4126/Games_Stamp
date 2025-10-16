@@ -287,52 +287,52 @@ async function saveProgress() {
 
 function updateBoothLocks() {
   const gameCount = userData.stamps.filter(i => booths[i] && booths[i].type === "game").length;
-   
   const sponsorIndexes = booths
     .map((b, i) => b.type === "sponsor" ? i : null)
     .filter(i => i !== null);
 
+  // Step 1: Lock all sponsors by default
   sponsorIndexes.forEach(i => booths[i].locked = true);
 
-  if (gameCount >= 3) {
-    sponsorIndexes.forEach(i => booths[i].locked = false);
-  }
-
+  // Step 2: Find which sponsor (if any) has been stamped
   const stampedSponsorIndex = sponsorIndexes.find(i => userData.stamps.includes(i));
+
   if (stampedSponsorIndex !== undefined) {
+    // When a sponsor has been stamped, lock all others
+    sponsorIndexes.forEach(i => {
+      if (i !== stampedSponsorIndex) booths[i].locked = true;
+    });
+
+    // If player has >=5 game booths, unlock the others again
     if (gameCount >= 5) {
       sponsorIndexes.forEach(i => {
-        if (!userData.stamps.includes(i)) {
-          booths[i].locked = false; // 解鎖尚未蓋章的 sponsor
-        }
+        if (!userData.stamps.includes(i)) booths[i].locked = false;
       });
     }
-      
+
+    // If player has >=6 game booths, unlock all (final stage)
+    if (gameCount >= 6) {
+      sponsorIndexes.forEach(i => booths[i].locked = false);
+    }
+
   } else {
-    // --- 玩家還沒蓋過任何 sponsor 的情況 ---
-    // 第一次達到 3 個 game：解鎖第一個 sponsor（索引順序由 sponsorIndexes 決定）
+    // No sponsor stamped yet
     if (gameCount >= 3) {
-      // 解鎖第一個尚未被蓋過的 sponsor（通常 sponsorIndexes[0]）
-      const first = sponsorIndexes[0];
-      if (first !== undefined && !userData.stamps.includes(first)) {
-        booths[first].locked = false;
-      }
+      // Unlock all sponsor booths after 3 games
+      sponsorIndexes.forEach(i => booths[i].locked = false);
     }
 
     if (gameCount >= 5) {
-      sponsorIndexes.forEach(i => {
-        if (!userData.stamps.includes(i)) booths[i].locked = false;
-      });
+      // Ensure they stay unlocked when reaching 5 games
+      sponsorIndexes.forEach(i => booths[i].locked = false);
     }
-        
+
     if (gameCount >= 6) {
-      sponsorIndexes.forEach(i => {
-        if (!userData.stamps.includes(i)) booths[i].locked = false;
-      });
+      // Same for 6 games
+      sponsorIndexes.forEach(i => booths[i].locked = false);
     }
   }
 }
-
 function renderBooths() {
   const sponsorList = document.getElementById("sponsorList");
   const gameList = document.getElementById("gameList");
