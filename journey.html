@@ -288,52 +288,43 @@ async function saveProgress() {
 function updateBoothLocks() {
   const gameCount = userData.stamps.filter(i => booths[i] && booths[i].type === "game").length;
   const sponsorIndexes = booths
-    .map((b, i) => b.type === "sponsor" ? i : null)
+    .map((b, i) => (b.type === "sponsor" ? i : null))
     .filter(i => i !== null);
 
   // Step 1: Lock all sponsors by default
-  sponsorIndexes.forEach(i => booths[i].locked = true);
+  sponsorIndexes.forEach(i => (booths[i].locked = true));
 
   // Step 2: Find which sponsor (if any) has been stamped
   const stampedSponsorIndex = sponsorIndexes.find(i => userData.stamps.includes(i));
 
   if (stampedSponsorIndex !== undefined) {
-    // When a sponsor has been stamped, lock all others
+    // 🧠 When a sponsor has been stamped, lock all others
     sponsorIndexes.forEach(i => {
       if (i !== stampedSponsorIndex) booths[i].locked = true;
     });
 
-    // If player has >=5 game booths, unlock the others again
-    if (gameCount >= 5) {
-      sponsorIndexes.forEach(i => {
-        if (!userData.stamps.includes(i)) booths[i].locked = false;
-      });
-    }
-
-    // If player has >=6 game booths, unlock all (final stage)
-    if (gameCount >= 6) {
-      sponsorIndexes.forEach(i => booths[i].locked = false);
-    }
-
-  } else {
-    // No sponsor stamped yet
-    if (gameCount >= 3) {
-      // Unlock all sponsor booths after 3 games
-      sponsorIndexes.forEach(i => booths[i].locked = false);
-    }
-
+    // 🧩 After 5 or more game booths:
+    // If the user stamps another sponsor, re-lock the others again.
     if (gameCount >= 5 && gameCount < 6) {
       sponsorIndexes.forEach(i => {
         if (i !== stampedSponsorIndex) booths[i].locked = true;
       });
     }
 
+    // ✅ After 6 or more game booths → unlock all sponsors permanently
     if (gameCount >= 6) {
-      // Same for 6 games
-      sponsorIndexes.forEach(i => booths[i].locked = false);
+      sponsorIndexes.forEach(i => (booths[i].locked = false));
+    }
+
+  } else {
+    // No sponsor stamped yet
+    if (gameCount >= 3) {
+      // Unlock all sponsor booths after 3 games
+      sponsorIndexes.forEach(i => (booths[i].locked = false));
     }
   }
 }
+  
 function renderBooths() {
   const sponsorList = document.getElementById("sponsorList");
   const gameList = document.getElementById("gameList");
