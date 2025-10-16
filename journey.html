@@ -309,21 +309,20 @@ function updateBoothLocks() {
     sponsorIndexes.forEach(i => (booths[i].locked = i !== stamped));
     return;
   }
+  
+  if (gameCount === 5) {
+  const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
 
-  // === Stage 4: After 5 games ===
-  if (gameCount >= 5 && gameCount < 6) {
-    sponsorIndexes.forEach(i => {
-      if (!userData.stamps.includes(i)) booths[i].locked = false;
-    });
-    return;
+  if (stampedSponsors.length >= 1) {
+    // 🔒 Re-lock all except the latest stamped sponsor
+    const latest = stampedSponsors[stampedSponsors.length - 1];
+    sponsorIndexes.forEach(i => (booths[i].locked = i !== latest));
+  } else {
+    // 🔓 Unlock all sponsors if none stamped yet
+    sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
-
-  // === Stage 5: After 5 games and a new sponsor stamped again ===
-  if (gameCount >= 5 && gameCount < 6 && stampedSponsors.length === 2) {
-    const stamped = stampedSponsors[0];
-    sponsorIndexes.forEach(i => (booths[i].locked = i !== stamped));
-    return;
-  }
+  return;
+}
 
   // === Stage 6: After all 6 games ===
   if (gameCount >= 6) {
