@@ -53,9 +53,29 @@ header {
   font-weight: 600;
   margin-top: 20px;
 }
-#sponsorList, #gameList {
+#sponsorList {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(3, 1fr); /* always 3 in one row */
+  gap: 14px;
+  justify-items: center;
+  padding: 10px 20px;
+}
+
+#sponsorList .booth {
+  width: 130px;
+  height: 130px;
+  background: linear-gradient(145deg, #f7f3dc, #ede6bb); /* light gold tint */
+  border: 2px dashed #c6b665;
+}
+
+#sponsorList .booth:hover {
+  border-color: #d6c24b;
+  box-shadow: 0 6px 15px rgba(200, 180, 60, 0.3);
+}
+
+#gameList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 20px;
   justify-items: center;
   padding: 10px 20px;
@@ -233,12 +253,12 @@ const booths = [
   { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
   { name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", type: "game" },
   { name: "Eco Monopoly", desc: "Roll the dice, answer questions, and complete sustainable challenges to move forward.", type: "game" },
-  { name: "Sponsors 1", desc: "🎁 Redeem a small gift after completing 3 game booths!", type: "sponsor", locked: true },
+  { name: "Sponsors 1", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true },
   { name: "DIY Phone Holder / Lifestyle Deco Item", desc: "Reuse discarded materials to craft a phone holder or lifestyle decorative item.", type: "game" },
   { name: "Trash Bowling", desc: "Roll the ball to knock down non-recyclable trash bottles.", type: "game" },
-  { name: "Sponsors 2", desc: "🎁 Redeem a small gift after completing 5 game booths!", type: "sponsor", locked: true },
+  { name: "Sponsors 2", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true },
   { name: "Create Your Own Monalisa", desc: "Use an egg tray carton to paint and create your favorite patterns.", type: "game" },
-  { name: "Sponsors 3", desc: "🎁 Redeem a special gift after completing all 6 game booths!", type: "sponsor", locked: true }
+  { name: "Sponsors 3", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true }
 ];
 
 const boothList = document.getElementById("boothList");
@@ -269,16 +289,17 @@ function updateBoothLocks() {
   const gameCount = userData.stamps.filter(i => booths[i].type === "game").length;
   const sponsorIndexes = booths.map((b, i) => b.type === "sponsor" ? i : null).filter(i => i !== null);
 
-  // Lock all sponsor booths by default
   sponsorIndexes.forEach(i => booths[i].locked = true);
 
-  // Unlock according to game progress
-  if (gameCount >= 3 && gameCount < 5) {
-    booths[sponsorIndexes[0]].locked = false; // Unlock first sponsor
-  } else if (gameCount >= 5 && gameCount < 6) {
-    booths[sponsorIndexes[1]].locked = false; // Unlock second sponsor
-  } else if (gameCount >= 6) {
-    booths[sponsorIndexes[2]].locked = false; // Unlock all sponsor booths
+  if (gameCount >= 3) {
+    sponsorIndexes.forEach(i => booths[i].locked = false);
+  }
+
+  const stampedSponsorIndex = sponsorIndexes.find(i => userData.stamps.includes(i));
+  if (stampedSponsorIndex !== undefined) {
+    sponsorIndexes.forEach(i => {
+      if (i !== stampedSponsorIndex) booths[i].locked = true;
+    });
   }
 }
 
