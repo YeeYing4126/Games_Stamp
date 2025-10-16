@@ -360,7 +360,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
   
-function openModal(booth,index){
+function openModal(booth, index) {
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerText = booth.desc;
   stampMsg.textContent = "Place your stamp here!";
@@ -371,80 +371,101 @@ function openModal(booth,index){
     return;
   }
 
-  let activePointers = new Map();
+  const activePointers = new Map();
   let stableTimer = null;
 
-  function evaluateStamp(){
+  function evaluateStamp() {
     const touches = activePointers.size;
-    if(touches < minTouches){
-      stampMsg.textContent = 'Use the official stamp chop!';
-      if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
-      return;
-    }
+
     const pts = Array.from(activePointers.values());
-    let maxd=0;
-    for(let i=0;i<pts.length;i++){
-      for(let j=i+1;j<pts.length;j++){
+    let maxd = 0;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
         const dx = pts[i].clientX - pts[j].clientX;
         const dy = pts[i].clientY - pts[j].clientY;
-        const d = Math.hypot(dx,dy);
-        if(d>maxd) maxd=d;
+        const d = Math.hypot(dx, dy);
+        if (d > maxd) maxd = d;
+      }
+    }
+
+    if (touches >= minTouches && diameterMm >= lower && diameterMm <= upper) {
+      if (!stableTimer) {
+        stableTimer = setTimeout(() => finishStamp(), stableTimeMs);
+        stampMsg.textContent = "Hold steady...";
+      }
+      return;
+    }
+    
+    if (touches === 1) {
+      const p = Array.from(activePointers.values())[0];
+    
+      const areaWidthPx = p.width || (p.radiusX ? p.radiusX * 2 : 0);
+      const diameterMmSingle = pxToMm(areaWidthPx);
+      const singleLower = targetDiameterMm - toleranceMm;
+      const singleUpper = targetDiameterMm + toleranceMm;
+
+      if (diameterMmSingle >= singleLower && diameterMmSingle <= singleUpper) {
+        if (!stableTimer) {
+          stableTimer = setTimeout(() => finishStamp(), stableTimeMs);
+          stampMsg.textContent = "Hold steady...";
+        }
+        return;
       }
     }
     
-    const diameterMm = pxToMm(maxd);
-    const lower = targetDiameterMm-toleranceMm;
-    const upper = targetDiameterMm+toleranceMm;
+    if (stableTimer) {
+      clearTimeout(stableTimer);
+      stableTimer = null;
+    }
+    stampMsg.textContent = "Use the official stamp!";
+  }
 
-    if(diameterMm>=lower && diameterMm<=upper){
-      if(!stableTimer){
-        stableTimer = setTimeout(()=>{
-          if (!userData.stamps.includes(index)) {
-              userData.stamps.push(index);
-              userData.stamps = [...new Set(userData.stamps)]; // ensure uniqueness
+  function finishStamp() {
+    if (!userData.stamps.includes(index)) {
+      userData.stamps.push(index);
+      userData.stamps = [...new Set(userData.stamps)];
             
-              // If a sponsor booth is stamped, re-lock the others
-              if (booths[index].type === "sponsor") {
-                booths.forEach((b, i) => {
-                  if (b.type === "sponsor" && i !== index) b.locked = true;
-                });
-               }
+      if (booths[index].type === "sponsor") {
+        booths.forEach((b, i) => {
+          if (b.type === "sponsor" && i !== index) b.locked = true;
+        });
+      }
 
               // Recalculate which sponsor booths should be open
               updateBoothLocks();
             
-              saveProgress();
-              stampSound.play();
-              stampMsg.textContent = "✅ Stamp successful!";
-              renderBooths();
-              }
-          stableTimer = null;
-        }, stableTimeMs);
-      } else {
-        stampMsg.textContent = "Hold steady...";
-      }
-    } else {
-      if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
-      stampMsg.textContent = 'Stamp size not correct';
+      updateBoothLocks();
+      saveProgress();
+      stampSound.play();
+      stampMsg.textContent = "✅ Stamp successful!";
+      renderBooths();
     }
+    stableTimer = null;
   }
   
-    stampStage.onpointerdown = e=>{
-    activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
+  stampStage.onpointerdown = (e) => {
+    activePointers.set(e.pointerId, e);
     evaluateStamp();
   };
-  stampStage.onpointermove = e=>{
-    if(!activePointers.has(e.pointerId)) return;
-    activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
-    evaluateStamp();
+  stampStage.onpointermove = (e) => {
+    if (activePointers.has(e.pointerId)) {
+      activePointers.set(e.pointerId, e);
+      evaluateStamp();
+    }
   };
-  stampStage.onpointerup = e=>{
+  stampStage.onpointerup = (e) => {
     activePointers.delete(e.pointerId);
-    if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+    if (stableTimer) {
+      clearTimeout(stableTimer);
+      stableTimer = null;
+    }
   };
-  stampStage.onpointercancel = e=>{
+  stampStage.onpointercancel = (e) => {
     activePointers.delete(e.pointerId);
-    if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+    if (stableTimer) {
+      clearTimeout(stableTimer);
+      stableTimer = null;
+    }
   };
 }
   
