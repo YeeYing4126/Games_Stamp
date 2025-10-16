@@ -297,31 +297,41 @@ function updateBoothLocks() {
   // Step 2: Find which sponsor (if any) has been stamped
   const stampedSponsorIndex = sponsorIndexes.find(i => userData.stamps.includes(i));
 
-  if (stampedSponsorIndex !== undefined) {
-    // 🧠 When a sponsor has been stamped, lock all others
+  // === Stage 1: Before 3 games ===
+  if (gameCount < 3) return;
+
+  // === Stage 2: After 3 games but before any sponsor stamp ===
+  if (gameCount >= 3 && stampedSponsors.length === 0) {
+    sponsorIndexes.forEach(i => (booths[i].locked = false));
+    return;
+  }
+
+  // === Stage 3: After sponsor 1 stamped ===
+  if (gameCount >= 3 && gameCount < 5 && stampedSponsors.length === 1) {
+    const stamped = stampedSponsors[0];
+    sponsorIndexes.forEach(i => (booths[i].locked = i !== stamped));
+    return;
+  }
+
+  // === Stage 4: After 5 games ===
+  if (gameCount >= 5 && gameCount < 6) {
+    // unlock all *remaining* sponsors not yet stamped
     sponsorIndexes.forEach(i => {
-      if (i !== stampedSponsorIndex) booths[i].locked = true;
+      if (!userData.stamps.includes(i)) booths[i].locked = false;
     });
+    return;
+  }
 
-    // 🧩 After 5 or more game booths:
-    // If the user stamps another sponsor, re-lock the others again.
-    if (gameCount >= 5 && gameCount < 6) {
-      sponsorIndexes.forEach(i => {
-        if (i !== stampedSponsorIndex) booths[i].locked = true;
-      });
-    }
+  // === Stage 5: After 5 games and a new sponsor stamped again ===
+  if (gameCount >= 5 && gameCount < 6 && stampedSponsors.length >= 1) {
+    const latestStamped = stampedSponsors[stampedSponsors.length - 1];
+    sponsorIndexes.forEach(i => (booths[i].locked = i !== latestStamped));
+    return;
+  }
 
-    // ✅ After 6 or more game booths → unlock all sponsors permanently
-    if (gameCount >= 6) {
-      sponsorIndexes.forEach(i => (booths[i].locked = false));
-    }
-
-  } else {
-    // No sponsor stamped yet
-    if (gameCount >= 3) {
-      // Unlock all sponsor booths after 3 games
-      sponsorIndexes.forEach(i => (booths[i].locked = false));
-    }
+  // === Stage 6: After all 6 games ===
+  if (gameCount >= 6) {
+    sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
 }
   
