@@ -312,7 +312,7 @@ function updateBoothLocks() {
   }
 
   // 5️⃣ After 5 games but before 6
-  if (gameCount === 5) {
+  if (gameCount >= 5 && gameCount <= 6) {
     if (stampedSponsors.length === 0) {
       // unlock any still locked sponsors
       sponsorIndexes.forEach(i => {
@@ -327,7 +327,7 @@ function updateBoothLocks() {
   }
 
   // 6️⃣ After all 6 games → all open
-  if (gameCount >= 6) {
+  if (gameCount >= 8) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
 }
