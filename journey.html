@@ -319,7 +319,7 @@ function updateBoothLocks() {
   }
 
   // === Stage 5: After 5 games and a new sponsor stamped again ===
-  if (gameCount >= 5 && gameCount < 6 && stampedSponsors.length >= 1) {
+  if (gameCount >= 5 && gameCount < 6 && stampedSponsors.length === 2) {
     const stamped = stampedSponsors[0];
     sponsorIndexes.forEach(i => (booths[i].locked = i !== stamped));
     return;
