@@ -26,12 +26,12 @@ header {
 }
 .container {
   max-width: 480px;
-  width: 100%;
-  margin: 20px;
+  width: 94%;
+  margin: 12px;
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  padding: 20px;
+  padding: 16px;
 }
 .progress {
   width: 100%;
@@ -55,10 +55,10 @@ header {
 }
 #sponsorList {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* always 3 in one row */
+  grid-template-columns: repeat(3, 1fr); 
   gap: 14px;
   justify-items: center;
-  padding: 10px 20px;
+  padding: 8px 16px;
 }
 
 #sponsorList .booth {
@@ -89,8 +89,8 @@ header {
 }
 
 .booth {
-  width: 160px;
-  height: 160px;
+  width: 120px;
+  height: 120px;
   background: linear-gradient(145deg, #e9f5ea, #cfe8d1);
   border: 2px dashed #8cbf92;
   border-radius: 18px;
@@ -151,10 +151,11 @@ header {
   }
 }
 
-@media (max-width: 500px) {
-  .booth {
+@media (max-width: 600px) {
+  body {
     width: 130px;
     height: 130px;
+      align-items: stretch;
   }
 }
 
