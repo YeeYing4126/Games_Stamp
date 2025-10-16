@@ -47,6 +47,19 @@ header {
   width: 0%;
   transition: width 0.3s;
 }
+.section-title {
+  text-align: center;
+  color: #2e4d36;
+  font-weight: 600;
+  margin-top: 20px;
+}
+#sponsorList, #gameList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+  justify-items: center;
+  padding: 10px 20px;
+}
 #boothList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -177,7 +190,12 @@ header {
 <div class="container" id="mainApp">
   <div id="progressText"></div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-  <div id="boothList"></div>
+  
+  <h3 class="section-title">🎁 Sponsors Booths</h3>
+  <div id="sponsorList"></div>
+
+  <h3 class="section-title">🎮 Game Booths</h3>
+  <div id="gameList"></div>
 </div>
 
 <!-- Booth Modal -->
@@ -265,14 +283,21 @@ function updateBoothLocks() {
 }
 
 function renderBooths() {
-  boothList.innerHTML = "";
+  const sponsorList = document.getElementById("sponsorList");
+  const gameList = document.getElementById("gameList");
+  sponsorList.innerHTML = "";
+  gameList.innerHTML = "";
+  
   let stampedCount = [...new Set(userData.stamps)].length;
   
   booths.forEach((b,i)=>{
     const stamped = userData.stamps.includes(i);
     const div = document.createElement("div");
     div.className = "booth";
-    div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped?'stamped':''}">${stamped?'✓':''}</div>`;
+
+    const stampSymbol = b.type === "sponsor" && stamped ? "🎁" : stamped ? "✓" : "";
+    div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped ? "stamped" : ""}">${stampSymbol}</div>`;
+    
     if (b.locked) {
       div.style.opacity = "0.4";
       div.style.pointerEvents = "none";
@@ -280,8 +305,11 @@ function renderBooths() {
       div.style.opacity = "1";
       div.style.pointerEvents = "auto";
     }
+    
     div.onclick = ()=>openModal(b,i);
-    boothList.appendChild(div);
+    
+    if (b.type === "sponsor") sponsorList.appendChild(div);
+    else gameList.appendChild(div);
   });
   
   let progress = Math.round((stampedCount / booths.length) * 100);
