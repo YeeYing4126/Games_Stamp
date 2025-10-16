@@ -322,9 +322,10 @@ function updateBoothLocks() {
       sponsorIndexes.forEach(i => booths[i].locked = false);
     }
 
-    if (gameCount >= 5) {
-      // Ensure they stay unlocked when reaching 5 games
-      sponsorIndexes.forEach(i => booths[i].locked = false);
+    if (gameCount >= 5 && gameCount < 6) {
+      sponsorIndexes.forEach(i => {
+        if (i !== stampedSponsorIndex) booths[i].locked = true;
+      });
     }
 
     if (gameCount >= 6) {
