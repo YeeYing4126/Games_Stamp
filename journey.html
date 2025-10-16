@@ -303,6 +303,7 @@ onAuthStateChanged(auth, async (user) => {
       userData = { stamps: [] };
       await setDoc(docRef, userData);
     }
+    updateBoothLocks();
     renderBooths();
   } else {
     alert("Please sign in first.");
