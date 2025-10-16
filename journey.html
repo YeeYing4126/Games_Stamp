@@ -290,47 +290,47 @@ function updateBoothLocks() {
   const sponsorIndexes = booths
     .map((b, i) => (b.type === "sponsor" ? i : null))
     .filter(i => i !== null);
+
+  // ✅ Add this line (missing before)
   const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
 
-  // 1️⃣ Lock all sponsors by default
+  // Step 1: Lock all sponsors by default
   sponsorIndexes.forEach(i => (booths[i].locked = true));
 
-  // 2️⃣ Before 3 games → all locked
-  if (gameCount < 3) return;
-
-  // 3️⃣ After 3 games, before any sponsor stamp → unlock all sponsors
-  if (gameCount >= 3 && gameCount < 5 && stampedSponsors.length === 0) {
+  // === Stage 2: After 3 games but before any sponsor stamp ===
+  if (gameCount >= 3 && stampedSponsors.length === 0) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
     return;
   }
 
-  // 4️⃣ After 3–4 games, once a sponsor is stamped → lock the rest
-  if (gameCount >= 3 && gameCount < 5 && stampedSponsors.length >= 1) {
-    const latest = stampedSponsors[stampedSponsors.length - 1];
-    sponsorIndexes.forEach(i => (booths[i].locked = i !== latest));
+  // === Stage 3: After sponsor 1 stamped ===
+  if (gameCount >= 3 && gameCount < 5 && stampedSponsors.length === 1) {
+    const stamped = stampedSponsors[0];
+    sponsorIndexes.forEach(i => (booths[i].locked = i !== stamped));
     return;
   }
 
-  // 5️⃣ After 5 games but before 6
-  if (gameCount >= 5 && gameCount <= 6) {
-    if (stampedSponsors.length === 0) {
-      // unlock any still locked sponsors
-      sponsorIndexes.forEach(i => {
-        if (!userData.stamps.includes(i)) booths[i].locked = false;
-      });
-    } else {
-      // once user stamps another sponsor, keep only that one open again
-      const latest = stampedSponsors[stampedSponsors.length - 1];
-      sponsorIndexes.forEach(i => (booths[i].locked = i !== latest));
-    }
+  // === Stage 4: After 5 games ===
+  if (gameCount >= 5 && gameCount < 6) {
+    sponsorIndexes.forEach(i => {
+      if (!userData.stamps.includes(i)) booths[i].locked = false;
+    });
     return;
   }
 
-  // 6️⃣ After all 6 games → all open
-  if (gameCount >= 8) {
+  // === Stage 5: After 5 games and a new sponsor stamped again ===
+  if (gameCount >= 5 && gameCount < 6 && stampedSponsors.length >= 1) {
+    const stamped = stampedSponsors[0];
+    sponsorIndexes.forEach(i => (booths[i].locked = i !== stamped));
+    return;
+  }
+
+  // === Stage 6: After all 6 games ===
+  if (gameCount >= 6) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
 }
+
   
 function renderBooths() {
   const sponsorList = document.getElementById("sponsorList");
