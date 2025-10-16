@@ -6,8 +6,8 @@
   <title>Start My Journey</title>
   <script type="module">
     // Import Firebase SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
 
     // 🔥 Your Firebase config (replace with your actual values)
     const firebaseConfig = {
@@ -19,11 +19,11 @@
       messagingSenderId: "905147566179",
       appId: "1:905147566179:web:52e20f5afccd05166a1056",
       measurementId: "G-HVNWTXWPH4"
-  };
+    };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    const analytics = getAnalytics(app);
 
     // Providers
     const googleProvider = new GoogleAuthProvider();
