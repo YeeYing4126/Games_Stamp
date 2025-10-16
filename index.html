@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Start My Journey</title>
   <script type="module">
-    // Import Firebase SDK
+    // ✅ Import Firebase SDK modules correctly
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
-    
-    // 🔥 Your Firebase config (replace with your actual values)
+
+    // ✅ Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
       authDomain: "sustainable12.firebaseapp.com",
@@ -22,17 +22,17 @@
       measurementId: "G-HVNWTXWPH4"
     };
 
-    // Initialize Firebase
+    // ✅ Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const auth = getAuth(app);
 
-    // Providers
+    // ✅ Providers
     const googleProvider = new GoogleAuthProvider();
-    const microsoftProvider = new OAuthProvider('microsoft.com');
-    const yahooProvider = new OAuthProvider('yahoo.com');
+    const microsoftProvider = new OAuthProvider("microsoft.com");
+    const yahooProvider = new OAuthProvider("yahoo.com");
 
-    // When "Start My Journey" clicked
+    // ✅ Sign-in button logic
     window.startJourney = async () => {
       const providers = [googleProvider, microsoftProvider, yahooProvider];
       let user = null;
@@ -41,22 +41,22 @@
         try {
           const result = await signInWithPopup(auth, provider);
           user = result.user;
-          break;
+          break; // stop after first success
         } catch (error) {
-          if (error.code !== 'auth/popup-closed-by-user') {
+          if (error.code !== "auth/popup-closed-by-user") {
             console.error(error);
           }
         }
       }
 
       if (user) {
-        window.location.href = "./journey.html"; // redirect
+        window.location.href = "./journey.html";
       } else {
         alert("Sign-in failed or canceled. Please try again.");
       }
     };
 
-    // Auto redirect if already signed in
+    // ✅ Auto redirect if already signed in
     onAuthStateChanged(auth, (user) => {
       if (user) {
         window.location.href = "./journey.html";
