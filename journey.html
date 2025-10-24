@@ -272,12 +272,10 @@ const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
 
-const targetDiameterMm = 7;  // middle of 6–8 mm
-const toleranceMm = 1;       // ±1 mm tolerance
-const stableTimeMs = 200;    // faster detection since only one touch
-const minTouches = 1;        // only need one touch now
-const defaultPxPerMm = 96 / 25.4;
-function pxToMm(px){ return px / defaultPxPerMm; }
+const targetDiameterMm = 7; 
+const toleranceMm = 1;    
+const stableTimeMs = 200;   
+const minTouches = 1;       
 
 async function saveProgress() {
   if (!currentUser) return;
@@ -399,80 +397,77 @@ function openModal(booth,index){
     return;
   }
 
-  let activePointers = new Map();
-  let stableTimer = null;
+let stableTimer = null;
+let touchStartTime = 0;
 
-  function evaluateStamp(){
-    const touches = activePointers.size;
-    if(touches < minTouches){
-      stampMsg.textContent = 'Use the official stamp chop!';
-      if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
-      return;
-    }
-    const pts = Array.from(activePointers.values());
-    let maxd=0;
-    for(let i=0;i<pts.length;i++){
-      for(let j=i+1;j<pts.length;j++){
-        const dx = pts[i].clientX - pts[j].clientX;
-        const dy = pts[i].clientY - pts[j].clientY;
-        const d = Math.hypot(dx,dy);
-        if(d>maxd) maxd=d;
-      }
-    }
-    
-    const diameterMm = pxToMm(maxd);
-    const lower = targetDiameterMm-toleranceMm;
-    const upper = targetDiameterMm+toleranceMm;
-
-    if(diameterMm>=lower && diameterMm<=upper){
-      if(!stableTimer){
-        stableTimer = setTimeout(()=>{
-          if (!userData.stamps.includes(index)) {
-              userData.stamps.push(index);
-              userData.stamps = [...new Set(userData.stamps)]; // ensure uniqueness
-            
-              // If a sponsor booth is stamped, re-lock the others
-              if (booths[index].type === "sponsor") {
-                booths.forEach((b, i) => {
-                  if (b.type === "sponsor" && i !== index) b.locked = true;
-                });
-               }
-
-              // Recalculate which sponsor booths should be open
-              updateBoothLocks();
-            
-              saveProgress();
-              stampSound.play();
-              stampMsg.textContent = "✅ Stamp successful!";
-              renderBooths();
-              }
-          stableTimer = null;
-        }, stableTimeMs);
-      } else {
-        stampMsg.textContent = "Hold steady...";
-      }
-    } else {
-      if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
-      stampMsg.textContent = 'Stamp size not correct';
-    }
+function evaluateStamp(e) {
+  // Only accept stylus input
+  if (e.pointerType !== "pen") {
+    stampMsg.textContent = "🖊️ Please use the stylus pen to stamp!";
+    return;
   }
   
-    stampStage.onpointerdown = e=>{
-    activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
-    evaluateStamp();
-  };
-  stampStage.onpointermove = e=>{
-    if(!activePointers.has(e.pointerId)) return;
-    activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
-    evaluateStamp();
-  };
-  stampStage.onpointerup = e=>{
-    activePointers.delete(e.pointerId);
-    if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
-  };
-  stampStage.onpointercancel = e=>{
-    activePointers.delete(e.pointerId);
-    if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+  const widthMm = pxToMm(e.width || 25); // fallback if no width data
+  const heightMm = pxToMm(e.height || 25);
+  const diameterMm = (widthMm + heightMm) / 2;
+
+  const lower = 6;
+  const upper = 10;
+
+  if (diameterMm >= lower && diameterMm <= upper) {
+    if (!stableTimer) {
+      stableTimer = setTimeout(() => {
+        if (!userData.stamps.includes(currentBoothIndex)) {
+          userData.stamps.push(currentBoothIndex);
+          userData.stamps = [...new Set(userData.stamps)];
+
+          if (booths[currentBoothIndex].type === "sponsor") {
+            booths.forEach((b, i) => {
+              if (b.type === "sponsor" && i !== currentBoothIndex) b.locked = true;
+            });
+          }
+
+          updateBoothLocks();
+          saveProgress();
+          stampSound.play();
+          stampMsg.textContent = "✅ Stylus stamp successful!";
+          renderBooths();
+        }
+        stableTimer = null;
+      }, 200); // hold 0.2s
+      stampMsg.textContent = "Hold steady...";
+    }
+  } else {
+    stampMsg.textContent = "Stamp size not within range (6–10 mm)";
+    if (stableTimer) {
+      clearTimeout(stableTimer);
+      stableTimer = null;
+    }
+  }
+}
+
+let currentBoothIndex = null;
+
+function openModal(booth, index) {
+  modalBoothName.innerText = booth.name;
+  modalBoothDesc.innerText = booth.desc;
+  stampMsg.textContent = "Place your stylus here!";
+  modal.style.display = "flex";
+  currentBoothIndex = index;
+
+  if (userData.stamps.includes(index)) {
+    stampMsg.textContent = "✅ Already stamped!";
+    return;
+  }
+  
+  
+  stampStage.onpointerdown = (e) => evaluateStamp(e);
+  stampStage.onpointermove = (e) => evaluateStamp(e);
+  stampStage.onpointerup = () => {
+    if (stableTimer) {
+      clearTimeout(stableTimer);
+      stableTimer = null;
+    }
   };
 }
   
