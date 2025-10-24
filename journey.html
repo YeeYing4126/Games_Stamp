@@ -266,9 +266,37 @@ function updateBoothLocks() {
   const gameCount = userData.stamps.filter(i => booths[i] && booths[i].type === "game").length;
   const sponsorIndexes = booths.map((b, i) => (b.type === "sponsor" ? i : null)).filter(i => i !== null);
   const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
+
+  // Lock all first
   sponsorIndexes.forEach(i => (booths[i].locked = true));
-  if (gameCount >= 3 && stampedSponsors.length === 0) sponsorIndexes.forEach(i => (booths[i].locked = false));
-  if (gameCount >= 6) sponsorIndexes.forEach(i => (booths[i].locked = false));
+
+  // --- Step 1: After 3 games, unlock all sponsors if none stamped yet ---
+  if (gameCount >= 3 && stampedSponsors.length === 0) {
+    sponsorIndexes.forEach(i => (booths[i].locked = false));
+  }
+
+  // --- Step 2: After stamping 1 sponsor, lock others until 4+ games ---
+  if (stampedSponsors.length === 1) {
+    if (gameCount >= 4) {
+      sponsorIndexes
+        .filter(i => !userData.stamps.includes(i))
+        .forEach(i => (booths[i].locked = false));
+    }
+  }
+
+  // --- Step 3: After stamping 2 sponsors, lock last one until 6 games ---
+  if (stampedSponsors.length === 2) {
+    if (gameCount >= 6) {
+      sponsorIndexes
+        .filter(i => !userData.stamps.includes(i))
+        .forEach(i => (booths[i].locked = false));
+    }
+  }
+
+  // --- Step 4: If all sponsors stamped, keep all unlocked (for display) ---
+  if (stampedSponsors.length === sponsorIndexes.length) {
+    sponsorIndexes.forEach(i => (booths[i].locked = false));
+  }
 }
 
 function renderBooths() {
