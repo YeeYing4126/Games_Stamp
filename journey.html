@@ -344,10 +344,10 @@ function applyStamp(){
 }
 
 // --- Stylus / Strict Pressure Detection (v2.0) ---
-const targetDiameterMm = 4;  // stylus tip ~4mm
+const targetDiameterMm = 4; 
 const toleranceMm = 1.5;
-const stableTimeMs = 2000;   // must hold 2s
-const forceMin = 0.7;        // minimum pressure (stylus/firm press)
+const stableTimeMs = 500;  
+const forceMin = 0.7;   
 const defaultPxPerMm = 96 / 25.4;
 
 function pxToMm(px) {
