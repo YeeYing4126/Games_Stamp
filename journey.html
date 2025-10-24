@@ -235,7 +235,6 @@ header {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
@@ -251,19 +250,18 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const booths = [
-  { name: "Waste Sorting Challenge", desc: "Sort waste cards into bins.", type: "game", code: "booth1" },
-  { name: "Sugar Shock Guess", desc: "Guess sugar content.", type: "game", code: "booth2" },
-  { name: "Eco Monopoly", desc: "Roll dice and answer.", type: "game", code: "booth3" },
-  { name: "Sponsors 1", desc: "🎁 Redeem gift", type: "sponsor", locked: true, code: "sponsor1" },
-  { name: "DIY Phone Holder", desc: "Make a holder with waste.", type: "game", code: "booth4" },
-  { name: "Trash Bowling", desc: "Knock down bottles.", type: "game", code: "booth5" },
-  { name: "Sponsors 2", desc: "🎁 Redeem gift", type: "sponsor", locked: true, code: "sponsor2" },
-  { name: "Create Your Own Monalisa", desc: "Paint from egg tray.", type: "game", code: "booth6" },
-  { name: "Sponsors 3", desc: "🎁 Redeem gift", type: "sponsor", locked: true, code: "sponsor3" }
+  { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
+  { name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", type: "game" },
+  { name: "Eco Monopoly", desc: "Roll the dice, answer questions, and complete sustainable challenges to move forward.", type: "game" },
+  { name: "Sponsors 1", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true },
+  { name: "DIY Phone Holder / Lifestyle Deco Item", desc: "Reuse discarded materials to craft a phone holder or lifestyle decorative item.", type: "game" },
+  { name: "Trash Bowling", desc: "Roll the ball to knock down non-recyclable trash bottles.", type: "game" },
+  { name: "Sponsors 2", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true },
+  { name: "Create Your Own Monalisa", desc: "Use an egg tray carton to paint and create your favorite patterns.", type: "game" },
+  { name: "Sponsors 3", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true }
 ];
-  
-const sponsorList = document.getElementById("sponsorList");
-const gameList = document.getElementById("gameList");
+
+const boothList = document.getElementById("boothList");
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
 const modal = document.getElementById("boothModal");
@@ -274,15 +272,114 @@ const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
 
-let currentUser = null;
+const targetDiameterMm = 27;
+const toleranceMm = 2;
+const stableTimeMs = 300;
+const minTouches = 4;
+const defaultPxPerMm = 96 / 25.4;
+function pxToMm(px){ return px / defaultPxPerMm; }
+
+async function saveProgress() {
+  if (!currentUser) return;
+  const docRef = doc(db, "journeys", currentUser.uid);
+  await setDoc(docRef, userData);
+}
+
+function updateBoothLocks() {
+  const gameCount = userData.stamps.filter(i => booths[i] && booths[i].type === "game").length;
+  const sponsorIndexes = booths
+    .map((b, i) => (b.type === "sponsor" ? i : null))
+    .filter(i => i !== null);
+
+  // ✅ Add this line (missing before)
+  const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
+
+  // Step 1: Lock all sponsors by default
+  sponsorIndexes.forEach(i => (booths[i].locked = true));
+
+  // === Stage 2: After 3 games but before any sponsor stamp ===
+  if (gameCount >= 3 && stampedSponsors.length === 0) {
+    sponsorIndexes.forEach(i => (booths[i].locked = false));
+    return;
+  }
+
+  // === Stage 3: After sponsor 1 stamped ===
+  if (gameCount >= 3 && gameCount < 5 && stampedSponsors.length === 1) {
+    const stamped = stampedSponsors[0];
+    sponsorIndexes.forEach(i => (booths[i].locked = i !== stamped));
+    return;
+  }
+  
+  if (gameCount === 5) {
+  const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
+
+  if (stampedSponsors.length >= 1) {
+    // 🔒 Re-lock all except the latest stamped sponsor
+    const latest = stampedSponsors[stampedSponsors.length - 1];
+    sponsorIndexes.forEach(i => (booths[i].locked = i !== latest));
+  } else {
+    // 🔓 Unlock all sponsors if none stamped yet
+    sponsorIndexes.forEach(i => (booths[i].locked = false));
+  }
+  return;
+}
+
+  // === Stage 6: After all 6 games ===
+  if (gameCount >= 6) {
+    sponsorIndexes.forEach(i => (booths[i].locked = false));
+  }
+}
+
+  
+function renderBooths() {
+  const sponsorList = document.getElementById("sponsorList");
+  const gameList = document.getElementById("gameList");
+  sponsorList.innerHTML = "";
+  gameList.innerHTML = "";
+  
+  let stampedCount = [...new Set(userData.stamps)].length;
+  
+  booths.forEach((b,i)=>{
+    const stamped = userData.stamps.includes(i);
+    const div = document.createElement("div");
+    div.className = "booth";
+
+    const stampSymbol = b.type === "sponsor" && stamped ? "🎁" : stamped ? "✓" : "";
+    div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped ? "stamped" : ""}">${stampSymbol}</div>`;
+    
+    if (b.locked) {
+      div.style.opacity = "0.4";
+      div.style.pointerEvents = "none";
+    } else {
+      div.style.opacity = "1";
+      div.style.pointerEvents = "auto";
+    }
+    
+    div.onclick = ()=>openModal(b,i);
+    
+    if (b.type === "sponsor") sponsorList.appendChild(div);
+    else gameList.appendChild(div);
+  });
+  
+  let progress = Math.round((stampedCount / booths.length) * 100);
+  progressBar.style.width = progress + "%";
+  progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
+}
+
 let userData = { stamps: [] };
+let currentUser = null;
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     const docRef = doc(db, "journeys", user.uid);
     const docSnap = await getDoc(docRef);
-    userData = docSnap.exists() ? docSnap.data() : { stamps: [] };
+    if (docSnap.exists()) {
+      userData = docSnap.data();
+    } else {
+      userData = { stamps: [] };
+      await setDoc(docRef, userData);
+    }
     updateBoothLocks();
     renderBooths();
   } else {
@@ -290,89 +387,97 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
   }
 });
-
-async function saveProgress() {
-  if (!currentUser) return;
-  await setDoc(doc(db, "journeys", currentUser.uid), userData);
-}
-
-function updateBoothLocks() {
-  const gameCount = userData.stamps.filter(i => booths[i] && booths[i].type === "game").length;
-  const sponsorIndexes = booths.map((b, i) => b.type === "sponsor" ? i : null).filter(i => i !== null);
-  const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
-
-  sponsorIndexes.forEach(i => (booths[i].locked = true));
-  if (gameCount >= 3 && stampedSponsors.length === 0) sponsorIndexes.forEach(i => (booths[i].locked = false));
-  if (gameCount >= 6) sponsorIndexes.forEach(i => (booths[i].locked = false));
-}
-
-function renderBooths() {
-  sponsorList.innerHTML = "";
-  gameList.innerHTML = "";
-  let stampedCount = [...new Set(userData.stamps)].length;
   
-  booths.forEach((b, i) => {
-    const stamped = userData.stamps.includes(i);
-    const div = document.createElement("div");
-    div.className = "booth";
-    const stampSymbol = b.type === "sponsor" && stamped ? "🎁" : stamped ? "✓" : "";
-    div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped ? "stamped" : ""}">${stampSymbol}</div>`;
-
-    div.style.opacity = b.locked ? "0.4" : "1";
-    div.style.pointerEvents = b.locked ? "none" : "auto";
-    div.onclick = () => openModal(b, i);
-
-    if (b.type === "sponsor") sponsorList.appendChild(div);
-    else gameList.appendChild(div);
-  });
-  
-  const progress = Math.round((stampedCount / booths.length) * 100);
-  progressBar.style.width = progress + "%";
-  progressText.innerText = `You have collected ${stampedCount} of ${booths.length} stamps`;
-}
-
-function openModal(booth, index) {
+function openModal(booth,index){
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerText = booth.desc;
+  stampMsg.textContent = "Place your stamp here!";
   modal.style.display = "flex";
-  stampMsg.innerHTML = `<button id="scanBtn">📷 Scan QR Code</button>`;
 
-  const scanBtn = document.getElementById("scanBtn");
-  scanBtn.onclick = async () => startQRScan(index);
-}
+  if (userData.stamps.includes(index)) {
+    stampMsg.textContent = "✅ Already stamped!";
+    return;
+  }
 
-async function startQRScan(index) {
-  stampMsg.textContent = "Opening camera...";
-  const video = document.createElement("video");
-  stampStage.innerHTML = "";
-  stampStage.appendChild(video);
+  let activePointers = new Map();
+  let stableTimer = null;
 
-  const scanner = new QrScanner(video, result => {
-    const code = result.data.trim();
-    const booth = booths[index];
-
-    if (code === booth.code) {
-      if (!userData.stamps.includes(index)) {
-        userData.stamps.push(index);
-        stampSound.play();
-        stampMsg.textContent = "✅ Stamp successful!";
-        saveProgress();
-        updateBoothLocks();
-        renderBooths();
-      } else {
-        stampMsg.textContent = "✅ Already stamped!";
-      }
-      scanner.stop();
-    } else {
-      stampMsg.textContent = "❌ Wrong QR code!";
+  function evaluateStamp(){
+    const touches = activePointers.size;
+    if(touches < minTouches){
+      stampMsg.textContent = 'Use the official stamp chop!';
+      if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+      return;
     }
-  }, { returnDetailedScanResult: true });
+    const pts = Array.from(activePointers.values());
+    let maxd=0;
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx = pts[i].clientX - pts[j].clientX;
+        const dy = pts[i].clientY - pts[j].clientY;
+        const d = Math.hypot(dx,dy);
+        if(d>maxd) maxd=d;
+      }
+    }
+    
+    const diameterMm = pxToMm(maxd);
+    const lower = targetDiameterMm-toleranceMm;
+    const upper = targetDiameterMm+toleranceMm;
 
-  await scanner.start();
+    if(diameterMm>=lower && diameterMm<=upper){
+      if(!stableTimer){
+        stableTimer = setTimeout(()=>{
+          if (!userData.stamps.includes(index)) {
+              userData.stamps.push(index);
+              userData.stamps = [...new Set(userData.stamps)]; // ensure uniqueness
+            
+              // If a sponsor booth is stamped, re-lock the others
+              if (booths[index].type === "sponsor") {
+                booths.forEach((b, i) => {
+                  if (b.type === "sponsor" && i !== index) b.locked = true;
+                });
+               }
+
+              // Recalculate which sponsor booths should be open
+              updateBoothLocks();
+            
+              saveProgress();
+              stampSound.play();
+              stampMsg.textContent = "✅ Stamp successful!";
+              renderBooths();
+              }
+          stableTimer = null;
+        }, stableTimeMs);
+      } else {
+        stampMsg.textContent = "Hold steady...";
+      }
+    } else {
+      if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+      stampMsg.textContent = 'Stamp size not correct';
+    }
+  }
+  
+    stampStage.onpointerdown = e=>{
+    activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
+    evaluateStamp();
+  };
+  stampStage.onpointermove = e=>{
+    if(!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, {clientX:e.clientX, clientY:e.clientY});
+    evaluateStamp();
+  };
+  stampStage.onpointerup = e=>{
+    activePointers.delete(e.pointerId);
+    if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+  };
+  stampStage.onpointercancel = e=>{
+    activePointers.delete(e.pointerId);
+    if(stableTimer){ clearTimeout(stableTimer); stableTimer=null; }
+  };
 }
-
-closeModal.onclick = () => modal.style.display = "none";
-window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
+  
+closeModal.onclick = ()=> modal.style.display="none";
+window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
 </script>
   
 </body>
