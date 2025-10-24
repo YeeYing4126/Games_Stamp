@@ -343,11 +343,11 @@ function applyStamp(){
   }
 }
 
-// --- Stylus touch detection settings ---
+// --- Stylus touch detection (strict mode) ---
 const targetDiameterMm = 7; // stylus tip size
 const toleranceMm = 2;      // ± tolerance
-const stableTimeMs = 300;   // hold duration to confirm
-const defaultPxPerMm = 96 / 25.4; // screen DPI conversion
+const stableTimeMs = 350;   // hold duration to confirm
+const defaultPxPerMm = 96 / 25.4;
 
 function pxToMm(px) {
   return px / defaultPxPerMm;
@@ -356,29 +356,37 @@ function pxToMm(px) {
 let touchTimer = null;
 let touchValid = false;
 
-stampStage.addEventListener("touchstart", e => {
-  const t = e.touches[0];
-  if (!t) return;
+stampStage.onclick = null; // disable simple clicks
 
-  // Estimate touch diameter in mm
+stampStage.addEventListener("touchstart", e => {
+  if (e.touches.length !== 1) {
+    touchMsg("⚠️ Use one stylus tip, not fingers!");
+    return;
+  }
+
+  const t = e.touches[0];
   const diameterPx = (t.radiusX + t.radiusY) * 2;
   const diameterMm = pxToMm(diameterPx);
 
-  // Check if touch diameter is within stylus size range
-  const withinStylusRange = (
+  // If radius data is not available (iOS Safari gives 0)
+  if (!t.radiusX || !t.radiusY || diameterMm === 0) {
+    touchMsg("⚠️ Your device doesn’t detect stylus area. Try holding longer or use supported device.");
+    return;
+  }
+
+  const withinStylusRange =
     diameterMm >= (targetDiameterMm - toleranceMm) &&
-    diameterMm <= (targetDiameterMm + toleranceMm)
-  );
+    diameterMm <= (targetDiameterMm + toleranceMm);
 
   if (withinStylusRange) {
     touchValid = true;
     touchTimer = setTimeout(() => {
       if (touchValid) {
-        applyStamp(); // Only stamp after stable stylus contact
+        applyStamp(); // only stamp after stable stylus contact
       }
     }, stableTimeMs);
   } else {
-    touchMsg("⚠️ Use the stylus to stamp (7mm tip).");
+    touchMsg("⚠️ Stylus tip only! Finger touch too big/small.");
   }
 });
 
@@ -392,7 +400,7 @@ function touchMsg(msg) {
   setTimeout(() => {
     if (!userData.stamps.includes(currentBoothIndex))
       stampMsg.textContent = "Tap here to stamp!";
-  }, 1500);
+  }, 2000);
 }
 
 closeModal.onclick = ()=> modal.style.display="none";
