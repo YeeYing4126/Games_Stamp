@@ -272,10 +272,10 @@ const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
 
-const targetDiameterMm = 27;
-const toleranceMm = 2;
-const stableTimeMs = 300;
-const minTouches = 4;
+const targetDiameterMm = 7;  // middle of 6–8 mm
+const toleranceMm = 1;       // ±1 mm tolerance
+const stableTimeMs = 200;    // faster detection since only one touch
+const minTouches = 1;        // only need one touch now
 const defaultPxPerMm = 96 / 25.4;
 function pxToMm(px){ return px / defaultPxPerMm; }
 
