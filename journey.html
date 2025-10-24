@@ -343,10 +343,11 @@ function applyStamp(){
   }
 }
 
-// --- Stylus / precise touch detection (enhanced strict mode) ---
+// --- Stylus / Strict Pressure Detection (v2.0) ---
 const targetDiameterMm = 4;  // stylus tip ~4mm
-const toleranceMm = 1.5;     // ±1.5mm
-const stableTimeMs = 500;    // must hold 0.5s steady
+const toleranceMm = 1.5;
+const stableTimeMs = 2000;   // must hold 2s
+const forceMin = 0.7;        // minimum pressure (stylus/firm press)
 const defaultPxPerMm = 96 / 25.4;
 
 function pxToMm(px) {
@@ -371,10 +372,10 @@ stampStage.addEventListener("touchstart", e => {
 
   const diameterPx = (t.radiusX + t.radiusY) * 2;
   const diameterMm = pxToMm(diameterPx);
+  const force = t.force || t.pressure || 0;
 
-  // Reject touches without radius data (most fingers)
   if (!t.radiusX || !t.radiusY || diameterMm === 0) {
-    touchMsg("⚠️ Unsupported device or no stylus detected.");
+    touchMsg("⚠️ No stylus data — try stylus device.");
     return;
   }
 
@@ -383,15 +384,20 @@ stampStage.addEventListener("touchstart", e => {
     diameterMm <= (targetDiameterMm + toleranceMm);
 
   if (!withinStylusRange) {
-    touchMsg("⚠️ Stylus tip only! Finger too large.");
+    touchMsg("⚠️ Stylus tip only! Finger too big.");
     return;
   }
 
-  // Passed radius check -> start stability timer
+  if (force < forceMin) {
+    touchMsg("⚠️ Press harder or use stylus.");
+    return;
+  }
+
+  // Passed all checks — start the 2s hold timer
   touchValid = true;
   touchTimer = setTimeout(() => {
     if (touchValid) {
-      applyStamp(); // confirm stamp after holding 0.5s
+      applyStamp();
     }
   }, stableTimeMs);
 });
@@ -402,7 +408,6 @@ stampStage.addEventListener("touchmove", e => {
   const dx = Math.abs(t.clientX - startX);
   const dy = Math.abs(t.clientY - startY);
   if (dx > 5 || dy > 5) {
-    // moved too much — cancel stamp
     touchValid = false;
     clearTimeout(touchTimer);
     touchMsg("⚠️ Hold still to stamp!");
@@ -419,9 +424,9 @@ function touchMsg(msg) {
   setTimeout(() => {
     if (!userData.stamps.includes(currentBoothIndex))
       stampMsg.textContent = "Tap here to stamp!";
-  }, 1800);
+  }, 2000);
 }
-
+  
 closeModal.onclick = ()=> modal.style.display="none";
 window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
 
