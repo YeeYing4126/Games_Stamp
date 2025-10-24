@@ -361,60 +361,63 @@ let startX = 0, startY = 0;
 stampStage.onclick = null; // disable easy click stamping
 
 stampStage.addEventListener("touchstart", e => {
+  e.preventDefault();
+  
   if (e.touches.length !== 1) {
-    touchMsg("⚠️ One stylus touch only!");
+    touchMsg("⚠️ 请使用单点触控");
     return;
   }
 
   const t = e.touches[0];
+  const now = Date.now();
+  
+  // 多重检测
+  const checks = {
+    hasPressure: () => (t.force || t.webkitForce || t.pressure || 0) > 0,
+    isSmallContact: () => {
+      const area = (t.radiusX || 5) * (t.radiusY || 5);
+      return area < 15; // 触控笔接触面积较小
+    },
+    hasStylusData: () => t.radiusX !== undefined && t.radiusY !== undefined
+  };
+
+  let passedChecks = 0;
+  Object.values(checks).forEach(check => {
+    if (check()) passedChecks++;
+  });
+
+  // 必须通过至少2项检测
+  if (passedChecks < 2) {
+    touchMsg("❌ 请使用触控笔设备");
+    return;
+  }
+
+  // 压力检测
+  const force = t.force || t.webkitForce || t.pressure || 0;
+  if (force < 0.7) {
+    touchMsg("⚠️ 请用触控笔用力按压");
+    return;
+  }
+
+  // 开始按压计时
+  touchValid = true;
   startX = t.clientX;
   startY = t.clientY;
-
-  const diameterPx = (t.radiusX + t.radiusY) * 2;
-  const diameterMm = pxToMm(diameterPx);
-  const force = t.force || t.pressure || 0;
-
-  if (!t.radiusX || !t.radiusY || diameterMm === 0) {
-    touchMsg("⚠️ No stylus data — try stylus device.");
-    return;
-  }
-
-  const withinStylusRange =
-    diameterMm >= (targetDiameterMm - toleranceMm) &&
-    diameterMm <= (targetDiameterMm + toleranceMm);
-
-  if (!withinStylusRange) {
-    touchMsg("⚠️ Stylus tip only! Finger too big.");
-    return;
-  }
-
-  if (force < forceMin) {
-    touchMsg("⚠️ Press harder or use stylus.");
-    return;
-  }
-
-  // Passed all checks — start the 2s hold timer
-  touchValid = true;
+  
+  // 添加按压视觉反馈
+  stampStage.classList.add('stamp-pressing');
+  
   touchTimer = setTimeout(() => {
     if (touchValid) {
       applyStamp();
     }
+    stampStage.classList.remove('stamp-pressing');
   }, stableTimeMs);
 });
 
-stampStage.addEventListener("touchmove", e => {
-  if (!touchValid) return;
-  const t = e.touches[0];
-  const dx = Math.abs(t.clientX - startX);
-  const dy = Math.abs(t.clientY - startY);
-  if (dx > 5 || dy > 5) {
-    touchValid = false;
-    clearTimeout(touchTimer);
-    touchMsg("⚠️ Hold still to stamp!");
-  }
-});
-
+// 触摸结束时移除视觉反馈
 stampStage.addEventListener("touchend", () => {
+  stampStage.classList.remove('stamp-pressing');
   touchValid = false;
   clearTimeout(touchTimer);
 });
