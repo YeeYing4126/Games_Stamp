@@ -385,17 +385,6 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
   }
 });
-  
-function openModal(booth,index){
-  modalBoothName.innerText = booth.name;
-  modalBoothDesc.innerText = booth.desc;
-  stampMsg.textContent = "Place your stamp here!";
-  modal.style.display = "flex";
-
-  if (userData.stamps.includes(index)) {
-    stampMsg.textContent = "✅ Already stamped!";
-    return;
-  }
 
 let stableTimer = null;
 let touchStartTime = 0;
