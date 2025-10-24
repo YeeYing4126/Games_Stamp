@@ -343,10 +343,10 @@ function applyStamp(){
   }
 }
 
-// --- Stylus touch detection (strict mode) ---
-const targetDiameterMm = 7; // stylus tip size
-const toleranceMm = 2;      // ± tolerance
-const stableTimeMs = 350;   // hold duration to confirm
+// --- Stylus / precise touch detection (enhanced strict mode) ---
+const targetDiameterMm = 4;  // stylus tip ~4mm
+const toleranceMm = 1.5;     // ±1.5mm
+const stableTimeMs = 500;    // must hold 0.5s steady
 const defaultPxPerMm = 96 / 25.4;
 
 function pxToMm(px) {
@@ -355,22 +355,26 @@ function pxToMm(px) {
 
 let touchTimer = null;
 let touchValid = false;
+let startX = 0, startY = 0;
 
-stampStage.onclick = null; // disable simple clicks
+stampStage.onclick = null; // disable easy click stamping
 
 stampStage.addEventListener("touchstart", e => {
   if (e.touches.length !== 1) {
-    touchMsg("⚠️ Use one stylus tip, not fingers!");
+    touchMsg("⚠️ One stylus touch only!");
     return;
   }
 
   const t = e.touches[0];
+  startX = t.clientX;
+  startY = t.clientY;
+
   const diameterPx = (t.radiusX + t.radiusY) * 2;
   const diameterMm = pxToMm(diameterPx);
 
-  // If radius data is not available (iOS Safari gives 0)
+  // Reject touches without radius data (most fingers)
   if (!t.radiusX || !t.radiusY || diameterMm === 0) {
-    touchMsg("⚠️ Your device doesn’t detect stylus area. Try holding longer or use supported device.");
+    touchMsg("⚠️ Unsupported device or no stylus detected.");
     return;
   }
 
@@ -378,15 +382,30 @@ stampStage.addEventListener("touchstart", e => {
     diameterMm >= (targetDiameterMm - toleranceMm) &&
     diameterMm <= (targetDiameterMm + toleranceMm);
 
-  if (withinStylusRange) {
-    touchValid = true;
-    touchTimer = setTimeout(() => {
-      if (touchValid) {
-        applyStamp(); // only stamp after stable stylus contact
-      }
-    }, stableTimeMs);
-  } else {
-    touchMsg("⚠️ Stylus tip only! Finger touch too big/small.");
+  if (!withinStylusRange) {
+    touchMsg("⚠️ Stylus tip only! Finger too large.");
+    return;
+  }
+
+  // Passed radius check -> start stability timer
+  touchValid = true;
+  touchTimer = setTimeout(() => {
+    if (touchValid) {
+      applyStamp(); // confirm stamp after holding 0.5s
+    }
+  }, stableTimeMs);
+});
+
+stampStage.addEventListener("touchmove", e => {
+  if (!touchValid) return;
+  const t = e.touches[0];
+  const dx = Math.abs(t.clientX - startX);
+  const dy = Math.abs(t.clientY - startY);
+  if (dx > 5 || dy > 5) {
+    // moved too much — cancel stamp
+    touchValid = false;
+    clearTimeout(touchTimer);
+    touchMsg("⚠️ Hold still to stamp!");
   }
 });
 
@@ -400,7 +419,7 @@ function touchMsg(msg) {
   setTimeout(() => {
     if (!userData.stamps.includes(currentBoothIndex))
       stampMsg.textContent = "Tap here to stamp!";
-  }, 2000);
+  }, 1800);
 }
 
 closeModal.onclick = ()=> modal.style.display="none";
