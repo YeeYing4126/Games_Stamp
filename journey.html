@@ -343,6 +343,58 @@ function applyStamp(){
   }
 }
 
+// --- Stylus touch detection settings ---
+const targetDiameterMm = 7; // stylus tip size
+const toleranceMm = 2;      // ± tolerance
+const stableTimeMs = 300;   // hold duration to confirm
+const defaultPxPerMm = 96 / 25.4; // screen DPI conversion
+
+function pxToMm(px) {
+  return px / defaultPxPerMm;
+}
+
+let touchTimer = null;
+let touchValid = false;
+
+stampStage.addEventListener("touchstart", e => {
+  const t = e.touches[0];
+  if (!t) return;
+
+  // Estimate touch diameter in mm
+  const diameterPx = (t.radiusX + t.radiusY) * 2;
+  const diameterMm = pxToMm(diameterPx);
+
+  // Check if touch diameter is within stylus size range
+  const withinStylusRange = (
+    diameterMm >= (targetDiameterMm - toleranceMm) &&
+    diameterMm <= (targetDiameterMm + toleranceMm)
+  );
+
+  if (withinStylusRange) {
+    touchValid = true;
+    touchTimer = setTimeout(() => {
+      if (touchValid) {
+        applyStamp(); // Only stamp after stable stylus contact
+      }
+    }, stableTimeMs);
+  } else {
+    touchMsg("⚠️ Use the stylus to stamp (7mm tip).");
+  }
+});
+
+stampStage.addEventListener("touchend", () => {
+  touchValid = false;
+  clearTimeout(touchTimer);
+});
+
+function touchMsg(msg) {
+  stampMsg.textContent = msg;
+  setTimeout(() => {
+    if (!userData.stamps.includes(currentBoothIndex))
+      stampMsg.textContent = "Tap here to stamp!";
+  }, 1500);
+}
+
 closeModal.onclick = ()=> modal.style.display="none";
 window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
 
