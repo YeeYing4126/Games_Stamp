@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Journey – Re:vibe</title>
 <style>
+
 body {
   font-family: 'Poppins', sans-serif;
   background-color: #f6f9f6;
@@ -182,6 +183,34 @@ header {
   font-size: 1em;
   color: #60b66e;
 }
+
+.stamp-instruction {
+  background: #fff9e6;
+  border: 2px solid #ffd166;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px 0;
+  text-align: center;
+  font-size: 0.9em;
+  color: #e67700;
+}
+
+.stamp-pressing {
+  animation: pressAnimation 0.5s ease-in-out;
+  background: linear-gradient(145deg, #ffec99, #ffd43b);
+}
+
+@keyframes pressAnimation {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.device-warning {
+  color: #ff6b6b;
+  font-size: 0.8em;
+  margin-top: 10px;
+}
 </style>
 </head>
 <body>
@@ -205,8 +234,15 @@ header {
     <span class="modal-close" id="closeModal">&times;</span>
     <h3 id="modalBoothName"></h3>
     <p id="modalBoothDesc"></p>
+    
+    <!-- 添加设备提示 -->
+    <div class="stamp-instruction">
+      ✏️ 请使用触控笔盖章
+      <div class="device-warning" id="deviceInfo"></div>
+    </div>
+    
     <div id="stampStage">
-      <span id="stampMsg">Tap here to stamp!</span>
+      <span id="stampMsg">请用触控笔按压</span>
     </div>
     <audio id="stampSound" src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/Revibe.mp3" preload="auto"></audio>
   </div>
@@ -251,10 +287,57 @@ const modalBoothDesc = document.getElementById("modalBoothDesc");
 const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
+const deviceInfo = document.getElementById("deviceInfo");
 
 let userData = { stamps: [] };
 let currentUser = null;
 let currentBoothIndex = null;
+
+// 设备检测
+function detectDeviceCapabilities() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const hasTouch = 'ontouchstart' in window;
+  
+  let capabilities = {
+    isIOS,
+    isAndroid,
+    hasTouch,
+    hasTouchType: false,
+    hasForceTouch: false,
+    hasRadius: false
+  };
+  
+  // 测试触摸事件属性
+  if (hasTouch) {
+    const testTouch = new Touch({
+      identifier: 0,
+      target: document.body,
+      clientX: 0,
+      clientY: 0,
+      radiusX: 0,
+      radiusY: 0,
+      force: 0
+    });
+    
+    capabilities.hasTouchType = 'touchType' in testTouch;
+    capabilities.hasForceTouch = 'force' in testTouch;
+    capabilities.hasRadius = 'radiusX' in testTouch;
+  }
+  
+  return capabilities;
+}
+
+// 显示设备信息
+function showDeviceInfo(caps) {
+  let info = [];
+  if (caps.isIOS) info.push("iOS设备");
+  if (caps.isAndroid) info.push("Android设备");
+  if (caps.hasTouchType) info.push("支持触控笔检测");
+  if (caps.hasForceTouch) info.push("支持压力感应");
+  
+  deviceInfo.textContent = info.join(" • ") || "基础触控设备";
+}
 
 async function saveProgress() {
   if (!currentUser) return;
@@ -267,15 +350,12 @@ function updateBoothLocks() {
   const sponsorIndexes = booths.map((b, i) => (b.type === "sponsor" ? i : null)).filter(i => i !== null);
   const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
 
-  // Lock all first
   sponsorIndexes.forEach(i => (booths[i].locked = true));
 
-  // --- Step 1: After 3 games, unlock all sponsors if none stamped yet ---
   if (gameCount >= 3 && stampedSponsors.length === 0) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
 
-  // --- Step 2: After stamping 1 sponsor, lock others until 4+ games ---
   if (stampedSponsors.length === 1) {
     if (gameCount >= 4) {
       sponsorIndexes
@@ -284,7 +364,6 @@ function updateBoothLocks() {
     }
   }
 
-  // --- Step 3: After stamping 2 sponsors, lock last one until 6 games ---
   if (stampedSponsors.length === 2) {
     if (gameCount >= 6) {
       sponsorIndexes
@@ -293,7 +372,6 @@ function updateBoothLocks() {
     }
   }
 
-  // --- Step 4: If all sponsors stamped, keep all unlocked (for display) ---
   if (stampedSponsors.length === sponsorIndexes.length) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
@@ -324,10 +402,111 @@ function renderBooths() {
 function openModal(booth,index){
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerText = booth.desc;
-  stampMsg.textContent = userData.stamps.includes(index) ? "✅ Already stamped!" : "Tap here to stamp!";
+  
+  // 检测设备能力
+  const caps = detectDeviceCapabilities();
+  showDeviceInfo(caps);
+  
+  stampMsg.textContent = userData.stamps.includes(index) ? "✅ Already stamped!" : "请用触控笔按压";
   modal.style.display = "flex";
   currentBoothIndex = index;
-  stampStage.onclick = ()=>applyStamp();
+  
+  setupStampDetection(caps);
+}
+
+function setupStampDetection(caps) {
+  // 清除之前的事件监听器
+  stampStage.replaceWith(stampStage.cloneNode(true));
+  const newStampStage = document.getElementById('stampStage');
+  
+  let touchTimer = null;
+  let touchValid = false;
+  let startX = 0, startY = 0;
+
+  newStampStage.addEventListener("touchstart", e => {
+    e.preventDefault();
+    
+    if (e.touches.length !== 1) {
+      touchMsg("⚠️ 请使用单点触控");
+      return;
+    }
+
+    const t = e.touches[0];
+    
+    // 跨平台触控笔检测
+    if (!isStylusTouch(t, caps)) {
+      touchMsg("❌ 请使用触控笔设备");
+      return;
+    }
+
+    // 开始按压计时
+    touchValid = true;
+    startX = t.clientX;
+    startY = t.clientY;
+    
+    newStampStage.classList.add('stamp-pressing');
+    
+    // 根据设备类型调整稳定时间
+    const stableTime = caps.isIOS ? 1000 : 500;
+    
+    touchTimer = setTimeout(() => {
+      if (touchValid) {
+        applyStamp();
+      }
+      newStampStage.classList.remove('stamp-pressing');
+    }, stableTime);
+  });
+
+  newStampStage.addEventListener("touchmove", e => {
+    if (!touchValid) return;
+    const t = e.touches[0];
+    const dx = Math.abs(t.clientX - startX);
+    const dy = Math.abs(t.clientY - startY);
+    if (dx > 8 || dy > 8) {
+      touchValid = false;
+      clearTimeout(touchTimer);
+      newStampStage.classList.remove('stamp-pressing');
+      touchMsg("⚠️ 请保持稳定按压");
+    }
+  });
+
+  newStampStage.addEventListener("touchend", () => {
+    touchValid = false;
+    clearTimeout(touchTimer);
+    newStampStage.classList.remove('stamp-pressing');
+  });
+}
+
+// 跨平台触控笔检测
+function isStylusTouch(touch, caps) {
+  // 方法1: 检查touchType (iOS 13+)
+  if (caps.hasTouchType && touch.touchType === 'stylus') {
+    return true;
+  }
+  
+  // 方法2: 检查接触面积 (Android/iOS通用)
+  const radiusX = touch.radiusX || 5;
+  const radiusY = touch.radiusY || 5;
+  const contactArea = radiusX * radiusY;
+  
+  // 触控笔接触面积通常较小
+  if (contactArea < 20) {
+    return true;
+  }
+  
+  // 方法3: 检查压力 (如果可用)
+  const force = touch.force || touch.webkitForce || 0;
+  if (caps.hasForceTouch && force > 0.5) {
+    return true;
+  }
+  
+  // 方法4: 对于不支持详细检测的设备，使用更宽松的策略
+  if (!caps.hasTouchType && !caps.hasForceTouch) {
+    // 如果设备不支持高级检测，允许较小的接触面积通过
+    return contactArea < 25;
+  }
+  
+  return false;
 }
 
 function applyStamp(){
@@ -343,90 +522,11 @@ function applyStamp(){
   }
 }
 
-// --- Stylus / Strict Pressure Detection (v2.0) ---
-const targetDiameterMm = 4; 
-const toleranceMm = 1.5;
-const stableTimeMs = 500;  
-const forceMin = 0.7;   
-const defaultPxPerMm = 96 / 25.4;
-
-function pxToMm(px) {
-  return px / defaultPxPerMm;
-}
-
-let touchTimer = null;
-let touchValid = false;
-let startX = 0, startY = 0;
-
-stampStage.onclick = null; // disable easy click stamping
-
-stampStage.addEventListener("touchstart", e => {
-  e.preventDefault();
-  
-  if (e.touches.length !== 1) {
-    touchMsg("⚠️ 请使用单点触控");
-    return;
-  }
-
-  const t = e.touches[0];
-  const now = Date.now();
-  
-  // 多重检测
-  const checks = {
-    hasPressure: () => (t.force || t.webkitForce || t.pressure || 0) > 0,
-    isSmallContact: () => {
-      const area = (t.radiusX || 5) * (t.radiusY || 5);
-      return area < 15; // 触控笔接触面积较小
-    },
-    hasStylusData: () => t.radiusX !== undefined && t.radiusY !== undefined
-  };
-
-  let passedChecks = 0;
-  Object.values(checks).forEach(check => {
-    if (check()) passedChecks++;
-  });
-
-  // 必须通过至少2项检测
-  if (passedChecks < 2) {
-    touchMsg("❌ 请使用触控笔设备");
-    return;
-  }
-
-  // 压力检测
-  const force = t.force || t.webkitForce || t.pressure || 0;
-  if (force < 0.7) {
-    touchMsg("⚠️ 请用触控笔用力按压");
-    return;
-  }
-
-  // 开始按压计时
-  touchValid = true;
-  startX = t.clientX;
-  startY = t.clientY;
-  
-  // 添加按压视觉反馈
-  stampStage.classList.add('stamp-pressing');
-  
-  touchTimer = setTimeout(() => {
-    if (touchValid) {
-      applyStamp();
-    }
-    stampStage.classList.remove('stamp-pressing');
-  }, stableTimeMs);
-});
-
-// 触摸结束时移除视觉反馈
-stampStage.addEventListener("touchend", () => {
-  stampStage.classList.remove('stamp-pressing');
-  touchValid = false;
-  clearTimeout(touchTimer);
-});
-
 function touchMsg(msg) {
   stampMsg.textContent = msg;
   setTimeout(() => {
     if (!userData.stamps.includes(currentBoothIndex))
-      stampMsg.textContent = "Tap here to stamp!";
+      stampMsg.textContent = "请用触控笔按压";
   }, 2000);
 }
   
