@@ -358,53 +358,120 @@ let touchTimer = null;
 let touchValid = false;
 let startX = 0, startY = 0;
 
-stampStage.onclick = null; // disable easy click stamping
+stampStage.onclick = null;
 
-stampStage.addEventListener("touchstart", e => {
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+if (isIOS && 'PointerEvent' in window) {
+  console.log("使用PointerEvent进行触控笔检测");
+
+  stampStage.addEventListener('pointerdown', handlePointerStart);
+  stampStage.addEventListener('pointermove', handlePointerMove);
+  stampStage.addEventListener('pointerup', handlePointerEnd);
+  stampStage.addEventListener('pointercancel', handlePointerEnd);
+} else {
+  // 使用原有的TouchEvent检测
+  stampStage.addEventListener("touchstart", handleTouchStart);
+  stampStage.addEventListener("touchmove", handleTouchMove);
+  stampStage.addEventListener("touchend", handleTouchEnd);
+}
+
+function handlePointerStart(e) {
+  e.preventDefault();
+
+  const pointerType = e.pointerType;
+  const pressure = e.pressure;
+  const width = e.width || 0;
+  const height = e.height || 0;
+
+  console.log(`PointerEvent: type=${pointerType}, pressure=${pressure}, width=${width}, height=${height}`);
+
+  if (pointerType === 'pen') {
+    // Apple Pencil
+    if (pressure >= 0.5) { // Apple Pencil压力阈值
+      startStampProcess(e.clientX, e.clientY);
+    } else {
+      touchMsg("⚠️ 请用Apple Pencil用力按压");
+    }
+  } else if (pointerType === 'touch') {
+    // 手指触摸 - 直接拒绝
+    touchMsg("❌ 请使用Apple Pencil，手指触摸无效");
+  }
+}
+
+function handleTouchStart(e) {
   e.preventDefault();
   
   if (e.touches.length !== 1) {
     touchMsg("⚠️ 请使用单点触控");
     return;
-  }
-
+  } 
   const t = e.touches[0];
-  const now = Date.now();
   
-  // 多重检测
-  const checks = {
-    hasPressure: () => (t.force || t.webkitForce || t.pressure || 0) > 0,
-    isSmallContact: () => {
-      const area = (t.radiusX || 5) * (t.radiusY || 5);
-      return area < 15; // 触控笔接触面积较小
-    },
-    hasStylusData: () => t.radiusX !== undefined && t.radiusY !== undefined
-  };
+  // 针对iPhone的检测调整
+  if (isIOS) {
+    // iPhone上的特殊处理
+    const hasForce = t.force > 0 || (window.Touch && t.force !== undefined);
+    
+    if (!hasForce) {
+      touchMsg("❌ 此iPhone不支持压力检测，请使用支持3D Touch的设备或Apple Pencil");
+      return;
+    }
+    
+    const force = t.force || 0;
+    if (force < 0.5) { // iPhone压力阈值调整
+      touchMsg("⚠️ 请用力按压");
+      return;
+    }
+    
+    // iPhone上接触面积检测
+    const radiusX = t.radiusX || 1;
+    const radiusY = t.radiusY || 1;
+    const contactArea = radiusX * radiusY;
+    
+    if (contactArea > 20) { // iPhone上手指接触面积通常更大
+      touchMsg("❌ 检测到手指触摸，请使用触控笔");
+      return;
+    }
+    
+    startStampProcess(t.clientX, t.clientY);
+  } else {
+    // Android设备使用原有逻辑
+    const checks = {
+      hasPressure: () => (t.force || t.webkitForce || t.pressure || 0) > 0,
+      isSmallContact: () => {
+        const area = (t.radiusX || 5) * (t.radiusY || 5);
+        return area < 15;
+      },
+      hasStylusData: () => t.radiusX !== undefined && t.radiusY !== undefined
+    };
 
-  let passedChecks = 0;
-  Object.values(checks).forEach(check => {
-    if (check()) passedChecks++;
-  });
+    let passedChecks = 0;
+    Object.values(checks).forEach(check => {
+      if (check()) passedChecks++;
+    });
 
-  // 必须通过至少2项检测
-  if (passedChecks < 2) {
-    touchMsg("❌ 请使用触控笔设备");
-    return;
+    if (passedChecks < 2) {
+      touchMsg("❌ 请使用触控笔设备");
+      return;
+    }
+
+    const force = t.force || t.webkitForce || t.pressure || 0;
+    if (force < 0.7) {
+      touchMsg("⚠️ 请用触控笔用力按压");
+      return;
+    }
+
+    startStampProcess(t.clientX, t.clientY);
   }
+}
 
-  // 压力检测
-  const force = t.force || t.webkitForce || t.pressure || 0;
-  if (force < 0.7) {
-    touchMsg("⚠️ 请用触控笔用力按压");
-    return;
-  }
-
-  // 开始按压计时
+// 通用的开始盖章流程
+function startStampProcess(startX, startY) {
   touchValid = true;
-  startX = t.clientX;
-  startY = t.clientY;
+  startX = startX;
+  startY = startY;
   
-  // 添加按压视觉反馈
   stampStage.classList.add('stamp-pressing');
   
   touchTimer = setTimeout(() => {
@@ -413,14 +480,46 @@ stampStage.addEventListener("touchstart", e => {
     }
     stampStage.classList.remove('stamp-pressing');
   }, stableTimeMs);
-});
+}
 
-// 触摸结束时移除视觉反馈
-stampStage.addEventListener("touchend", () => {
+function handlePointerMove(e) {
+  if (!touchValid) return;
+  
+  const dx = Math.abs(e.clientX - startX);
+  const dy = Math.abs(e.clientY - startY);
+  
+  if (dx > 5 || dy > 5) {
+    cancelStampProcess();
+    touchMsg("⚠️ 请保持稳定按压");
+  }
+}
+
+function handleTouchMove(e) {
+  if (!touchValid) return;
+  
+  const t = e.touches[0];
+  const dx = Math.abs(t.clientX - startX);
+  const dy = Math.abs(t.clientY - startY);
+  
+  if (dx > 5 || dy > 5) {
+    cancelStampProcess();
+    touchMsg("⚠️ 请保持稳定按压");
+  }
+}
+
+function handlePointerEnd() {
+  cancelStampProcess();
+}
+
+function handleTouchEnd() {
+  cancelStampProcess();
+}
+
+function cancelStampProcess() {
   stampStage.classList.remove('stamp-pressing');
   touchValid = false;
   clearTimeout(touchTimer);
-});
+}
 
 function touchMsg(msg) {
   stampMsg.textContent = msg;
