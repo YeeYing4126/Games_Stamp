@@ -7,8 +7,8 @@
 <style>
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #CBC8C4; /* Neon Silver - main background */
-  color: #2A3B27; /* Phthalo Green text */
+  background-color: #CBC8C4;
+  color: #2A3B27;
   margin: 0;
   padding: 0;
   display: flex;
@@ -16,7 +16,7 @@ body {
   align-items: center;
 }
 header {
-  background-color: #2A3B27; /* Phthalo Green */
+  background-color: #2A3B27;
   color: #FDFDFD;
   text-align: center;
   width: 100vw;
@@ -37,7 +37,7 @@ header {
 }
 .progress {
   width: 100%;
-  background: #96A7B6; /* Cadet Gray */
+  background: #96A7B6;
   border-radius: 14px;
   height: 20px;
   margin: 12px 0 25px 0;
@@ -45,13 +45,16 @@ header {
 }
 .progress-bar {
   height: 100%;
-  background: #70805D; /* French Lilac - progress fill */
+  background: linear-gradient(270deg, #70805D, #55738D, #96A7B6);
+  background-size: 200% 100%;
   width: 0%;
-  transition: width 0.3s;
+  transition: width 0.6s ease;
+  animation: progressMove 4s linear infinite;
+  border-radius: 14px;
 }
 .section-title {
   text-align: center;
-  color: #55738D; /* Queen Blue */
+  color: #55738D;
   font-weight: 600;
   margin-top: 25px;
   margin-bottom: 10px;
@@ -139,6 +142,11 @@ header {
   from { box-shadow: 0 0 10px 2px rgba(85,115,141,0.3); }
   to { box-shadow: 0 0 20px 6px rgba(112,128,93,0.7); }
 }
+@keyframes progressMove {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+  animation: progressMove 6s ease-in-out infinite;
+}
 @media (max-width: 500px) {
   #sponsorList {
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
@@ -217,6 +225,24 @@ header {
 }
 .how-btn:hover {
   background: #70805D;
+}
+.howToPlayModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* centers horizontally + vertically */
+  z-index: 1000;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 400px;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+.howToPlayModal.hidden {
+  display: none;
 }
 #howToPlayModal .modal-content {
   background: #FDFDFD;
