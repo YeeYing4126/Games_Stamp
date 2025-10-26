@@ -60,19 +60,16 @@ header {
   justify-items: center;
   padding: 10px 20px;
 }
-
 #sponsorList .booth {
   width: 130px;
   height: 130px;
   background: linear-gradient(145deg, #f7f3dc, #ede6bb);
   border: 2px dashed #c6b665;
 }
-
 #sponsorList .booth:hover {
   border-color: #d6c24b;
   box-shadow: 0 6px 15px rgba(200, 180, 60, 0.3);
 }
-
 #gameList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -80,7 +77,6 @@ header {
   justify-items: center;
   padding: 10px 20px;
 }
-
 .booth {
   width: 160px;
   height: 160px;
@@ -267,33 +263,17 @@ function updateBoothLocks() {
   const sponsorIndexes = booths.map((b, i) => (b.type === "sponsor" ? i : null)).filter(i => i !== null);
   const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
 
-  // Lock all first
   sponsorIndexes.forEach(i => (booths[i].locked = true));
 
-  // --- Step 1: After 3 games, unlock all sponsors if none stamped yet ---
   if (gameCount >= 3 && stampedSponsors.length === 0) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
-
-  // --- Step 2: After stamping 1 sponsor, lock others until 4+ games ---
-  if (stampedSponsors.length === 1) {
-    if (gameCount >= 4) {
-      sponsorIndexes
-        .filter(i => !userData.stamps.includes(i))
-        .forEach(i => (booths[i].locked = false));
-    }
+  if (stampedSponsors.length === 1 && gameCount >= 4) {
+    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
   }
-
-  // --- Step 3: After stamping 2 sponsors, lock last one until 6 games ---
-  if (stampedSponsors.length === 2) {
-    if (gameCount >= 6) {
-      sponsorIndexes
-        .filter(i => !userData.stamps.includes(i))
-        .forEach(i => (booths[i].locked = false));
-    }
+  if (stampedSponsors.length === 2 && gameCount >= 6) {
+    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
   }
-
-  // --- Step 4: If all sponsors stamped, keep all unlocked (for display) ---
   if (stampedSponsors.length === sponsorIndexes.length) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
@@ -327,123 +307,93 @@ function openModal(booth,index){
   stampMsg.textContent = userData.stamps.includes(index) ? "✅ Already stamped!" : "Tap here to stamp!";
   modal.style.display = "flex";
   currentBoothIndex = index;
-  stampStage.onclick = ()=>applyStamp();
 }
+
+// ✅ Multi-Touch Detection (2-finger, 1.5 cm, 300 ms)
+const targetDiameterMm = 15;
+const stableTimeMs = 300;
+const defaultPxPerMm = 96 / 25.4;
+function pxToMm(px){ return px / defaultPxPerMm; }
+let holdTimer = null;
+let touchCount = 0;
+stampStage.onclick = null;
+
+stampStage.addEventListener("touchstart", e=>{
+  e.preventDefault();
+  const touches = e.touches;
+  if(touches.length<2){
+    stampMsg.textContent="⚠️ Please Use the Right Stamp";
+    clearTimeout(holdTimer);
+    return;
+  }
+  const t1=touches[0], t2=touches[1];
+  const dx=t1.clientX-t2.clientX, dy=t1.clientY-t2.clientY;
+  const distMm=pxToMm(Math.sqrt(dx*dx+dy*dy));
+  if(distMm>targetDiameterMm){
+    stampMsg.textContent="❌ Please Try Again";
+    clearTimeout(holdTimer);
+    return;
+  }
+  stampMsg.textContent="⏳ Please hold still...";
+  holdTimer=setTimeout(()=>{
+    if(touchCount>=2) applyStamp();
+    else stampMsg.textContent="❌ Please Try Again";
+  },stableTimeMs);
+});
+stampStage.addEventListener("touchmove",e=>{touchCount=e.touches.length;});
+stampStage.addEventListener("touchend",e=>{
+  touchCount=e.touches.length;
+  if(touchCount<2){
+    clearTimeout(holdTimer);
+    if(!userData.stamps.includes(currentBoothIndex))
+      stampMsg.textContent="Tap here to stamp!";
+  }
+});
 
 function applyStamp(){
-  if (!userData.stamps.includes(currentBoothIndex)){
-    userData.stamps.push(currentBoothIndex);
-    stampSound.play();
-    stampMsg.textContent = "✅ Stamp successful!";
-    updateBoothLocks();
-    saveProgress();
-    renderBooths();
-  } else {
-    stampMsg.textContent = "✅ Already stamped!";
+  if (!currentUser) {
+    stampMsg.textContent = "⚠️ 请先登入以记录进度";
+    return;
   }
-}
-
-// --- Stylus / Strict Pressure Detection (v2.0) ---
-const targetDiameterMm = 4; 
-const toleranceMm = 1.5;
-const stableTimeMs = 500;  
-const forceMin = 0.7;   
-const defaultPxPerMm = 96 / 25.4;
-
-function pxToMm(px) {
-  return px / defaultPxPerMm;
-}
-
-let touchTimer = null;
-let touchValid = false;
-let startX = 0, startY = 0;
-
-stampStage.onclick = null; // disable easy click stamping
-
-stampStage.addEventListener("touchstart", e => {
-  e.preventDefault();
-  
-  if (e.touches.length !== 1) {
-    touchMsg("⚠️ 请使用单点触控");
+  if (userData.stamps.includes(currentBoothIndex)) {
+    stampMsg.textContent = "✅ Already Stamped";
     return;
   }
 
-  const t = e.touches[0];
-  const now = Date.now();
-  
-  // 多重检测
-  const checks = {
-    hasPressure: () => (t.force || t.webkitForce || t.pressure || 0) > 0,
-    isSmallContact: () => {
-      const area = (t.radiusX || 5) * (t.radiusY || 5);
-      return area < 15; // 触控笔接触面积较小
-    },
-    hasStylusData: () => t.radiusX !== undefined && t.radiusY !== undefined
-  };
+  userData.stamps.push(currentBoothIndex);
+  saveProgress();
+  stampSound.play();
 
-  let passedChecks = 0;
-  Object.values(checks).forEach(check => {
-    if (check()) passedChecks++;
-  });
+  const stampEl = document.querySelector(".modal-content .stamp");
+  stampMsg.textContent = "🎉 Stamped Successfully!";
+  stampEl.classList.add("stamped");
 
-  // 必须通过至少2项检测
-  if (passedChecks < 2) {
-    touchMsg("❌ 请使用触控笔设备");
-    return;
-  }
-
-  // 压力检测
-  const force = t.force || t.webkitForce || t.pressure || 0;
-  if (force < 0.7) {
-    touchMsg("⚠️ 请用触控笔用力按压");
-    return;
-  }
-
-  // 开始按压计时
-  touchValid = true;
-  startX = t.clientX;
-  startY = t.clientY;
-  
-  // 添加按压视觉反馈
-  stampStage.classList.add('stamp-pressing');
-  
-  touchTimer = setTimeout(() => {
-    if (touchValid) {
-      applyStamp();
-    }
-    stampStage.classList.remove('stamp-pressing');
-  }, stableTimeMs);
-});
-
-// 触摸结束时移除视觉反馈
-stampStage.addEventListener("touchend", () => {
-  stampStage.classList.remove('stamp-pressing');
-  touchValid = false;
-  clearTimeout(touchTimer);
-});
-
-function touchMsg(msg) {
-  stampMsg.textContent = msg;
+  // Temporary visual glow feedback on stampStage
+  stampStage.style.animation = "pulseGlow 1.5s ease-in-out";
   setTimeout(() => {
-    if (!userData.stamps.includes(currentBoothIndex))
-      stampMsg.textContent = "Tap here to stamp!";
-  }, 2000);
-}
-  
-closeModal.onclick = ()=> modal.style.display="none";
-window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; }
+    stampStage.style.animation = "";
+  }, 1500);
 
-onAuthStateChanged(auth, async (user)=>{
-  if (user) {
-    currentUser = user;
-    const docRef = doc(db, "journeys", user.uid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) userData = docSnap.data();
+  updateBoothLocks();
+  renderBooths();
+}
+
+// Close modal
+closeModal.onclick = ()=> modal.style.display="none";
+window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; };
+
+// Firebase Auth listener
+onAuthStateChanged(auth, async user=>{
+  if(user){
+    currentUser=user;
+    const docRef=doc(db,"journeys",user.uid);
+    const docSnap=await getDoc(docRef);
+    if(docSnap.exists()) userData=docSnap.data();
+    else await setDoc(docRef,userData);
     updateBoothLocks();
     renderBooths();
   } else {
-    alert("Please sign in first.");
-    window.location.href = "index.html";
+    alert("Please Sign In First");
   }
 });
 </script>
