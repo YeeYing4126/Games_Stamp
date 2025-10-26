@@ -7,7 +7,7 @@
 <style>
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #CBC8C4; /* Neon Silver */
+  background-color: #CBC8C4; /* Neon Silver - main background */
   color: #2A3B27; /* Phthalo Green text */
   margin: 0;
   padding: 0;
@@ -17,34 +17,35 @@ body {
 }
 header {
   background-color: #2A3B27; /* Phthalo Green */
-  color: #CBC8C4; /* Neon Silver */
+  color: #FDFDFD;
   text-align: center;
   width: 100vw;
-  padding: 20px 0;
-  font-size: 1.5em;
+  padding: 22px 0;
+  font-size: 1.6em;
   font-weight: 600;
-  box-sizing: border-box;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
 }
 .container {
   max-width: 480px;
   width: 100%;
-  margin: 20px;
+  margin: 25px 0;
   background: #FDFDFD;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(42, 59, 39, 0.15);
-  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(85, 115, 141, 0.25);
+  padding: 24px;
 }
 .progress {
   width: 100%;
   background: #96A7B6; /* Cadet Gray */
-  border-radius: 12px;
-  height: 18px;
-  margin: 10px 0 20px 0;
+  border-radius: 14px;
+  height: 20px;
+  margin: 12px 0 25px 0;
   overflow: hidden;
 }
 .progress-bar {
   height: 100%;
-  background-color: #70805D; /* French Lilac (as progress fill) */
+  background: #70805D; /* French Lilac - progress fill */
   width: 0%;
   transition: width 0.3s;
 }
@@ -52,7 +53,9 @@ header {
   text-align: center;
   color: #55738D; /* Queen Blue */
   font-weight: 600;
-  margin-top: 20px;
+  margin-top: 25px;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
 }
 #sponsorList {
   display: grid;
@@ -60,7 +63,6 @@ header {
   gap: 14px;
   justify-items: center;
   padding: 10px 10px;
-  box-sizing: border-box;
 }
 #sponsorList .booth {
   width: 100%;
@@ -82,16 +84,16 @@ header {
 #gameList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 20px;
+  gap: 18px;
   justify-items: center;
   padding: 10px 20px;
 }
 .booth {
-  width: 160px;
-  height: 160px;
-  background: linear-gradient(145deg, #EDEDED, #E2E2E2);
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(145deg, #FAFAFA, #EDEDED);
   border: 2px dashed #96A7B6;
-  border-radius: 18px;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,8 +105,8 @@ header {
 }
 .booth:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 15px rgba(85, 115, 141, 0.25);
   border-color: #70805D;
+  box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
 .booth h4 {
   font-size: 1em;
@@ -118,27 +120,24 @@ header {
   height: 46px;
   border-radius: 50%;
   border: 2px solid #70805D;
-  background: #CBC8C4;
+  background: #FDFDFD;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   color: #70805D;
   transition: all 0.3s ease;
-  box-shadow: inset 0 0 6px rgba(85, 115, 141, 0.25);
 }
 .stamped {
   background: radial-gradient(circle at center, #55738D 0%, #2A3B27 80%);
   border: 2px solid #2A3B27;
   color: #fff;
-  box-shadow: 0 0 12px 3px rgba(85, 115, 141, 0.5),
-              inset 0 0 8px rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
   animation: pulseGlow 1.5s infinite alternate;
 }
 @keyframes pulseGlow {
-  from { box-shadow: 0 0 10px 3px rgba(85, 115, 141, 0.3); }
-  to { box-shadow: 0 0 20px 6px rgba(112, 128, 93, 0.7); }
+  from { box-shadow: 0 0 10px 2px rgba(85,115,141,0.3); }
+  to { box-shadow: 0 0 20px 6px rgba(112,128,93,0.7); }
 }
 @media (max-width: 500px) {
   #sponsorList {
@@ -149,33 +148,38 @@ header {
     max-width: 100px;
   }
 }
-
-/* 🎮 Modal */
 .modal {
   display: none;
   position: fixed;
   z-index: 999;
   left: 0; top: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.45);
   justify-content: center;
   align-items: center;
 }
 .modal-content {
   background: #FDFDFD;
-  padding: 20px;
-  border-radius: 16px;
+  padding: 25px 25px 30px;
+  border-radius: 18px;
   text-align: center;
   position: relative;
-  box-shadow: 0 6px 15px rgba(85, 115, 141, 0.3);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 6px 20px rgba(42,59,39,0.25);
 }
 .modal-close {
   position: absolute;
-  top: 8px;
-  right: 12px;
+  top: 10px;
+  right: 14px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 22px;
   color: #55738D;
+  transition: color 0.3s ease;
+}
+.modal-close:hover {
+  color: #2A3B27;
 }
 #stampStage {
   width: 5cm;
@@ -185,24 +189,22 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  background-color: #CBC8C4;
+  border-radius: 10px;
   user-select: none;
   cursor: pointer;
-  background-color: #CBC8C4;
+  position: relative;
 }
 #stampMsg {
-  position: absolute;
   text-align: center;
   font-size: 1em;
   color: #2A3B27;
 }
-
-/* 📘 How to Play Button */
 .how-btn {
   position: fixed;
   top: 15px;
   right: 15px;
-  background: #55738D;
+  background: #2A3B27;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -210,31 +212,45 @@ header {
   font-size: 1rem;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
   z-index: 2000;
 }
 .how-btn:hover {
   background: #70805D;
 }
-
-/* 📘 Instruction Modal */
-.modal-content h2 {
+#howToPlayModal .modal-content {
+  background: #FDFDFD;
+  text-align: left;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 8px 25px rgba(42,59,39,0.35);
+  position: relative;
+  transform: translateY(0);
+}
+#howToPlayModal h2 {
   color: #55738D;
   text-align: center;
+  margin-bottom: 15px;
 }
-.modal-body p {
+#howToPlayModal .modal-body p {
   color: #2A3B27;
   margin: 10px 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
-.close {
-  color: #55738D;
-  float: right;
-  font-size: 24px;
+#howToPlayModal .close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 26px;
   font-weight: bold;
+  color: #70805D;
   cursor: pointer;
+  transition: color 0.3s;
 }
-.close:hover {
+#howToPlayModal .close:hover {
   color: #2A3B27;
 }
 </style>
