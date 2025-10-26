@@ -450,44 +450,52 @@ function openModal(booth,index){
   currentBoothIndex = index;
 }
 
-// ✅ Multi-Touch Detection (2-finger, 1.5 cm, 300 ms)
-const targetDiameterMm = 15;
+// ✅ Touch Detection (1–2 fingers, distance 7–15 mm, hold 300 ms)
+const minDistMm = 7;
+const maxDistMm = 15;
 const stableTimeMs = 300;
 const defaultPxPerMm = 96 / 25.4;
-function pxToMm(px){ return px / defaultPxPerMm; }
-let holdTimer = null;
-let touchCount = 0;
-stampStage.onclick = null;
+function pxToMm(px) { return px / defaultPxPerMm; }
 
-stampStage.addEventListener("touchstart", e=>{
+let holdTimer = null;
+
+stampStage.addEventListener("touchstart", (e) => {
   e.preventDefault();
   const touches = e.touches;
-  if(touches.length<2){
-    stampMsg.textContent="⚠️ Please Use the Right Stamp";
+
+  // Only allow 1 or 2 touches
+  if (touches.length > 2) {
+    stampMsg.textContent = "⚠️ Use the Right Stamp";
     clearTimeout(holdTimer);
     return;
   }
-  const t1=touches[0], t2=touches[1];
-  const dx=t1.clientX-t2.clientX, dy=t1.clientY-t2.clientY;
-  const distMm=pxToMm(Math.sqrt(dx*dx+dy*dy));
-  if(distMm>targetDiameterMm){
-    stampMsg.textContent="❌ Please Try Again";
-    clearTimeout(holdTimer);
-    return;
+
+  if (touches.length === 1) {
+    // Single finger press
+    stampMsg.textContent = "⏳ Please hold still...";
+    holdTimer = setTimeout(() => applyStamp(), stableTimeMs);
+  } 
+  else if (touches.length === 2) {
+    // Dual finger press — check distance range
+    const t1 = touches[0], t2 = touches[1];
+    const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+    const distMm = pxToMm(Math.sqrt(dx * dx + dy * dy));
+
+    if (distMm < minDistMm || distMm > maxDistMm) {
+      stampMsg.textContent = "❌ Please Try Again";
+      clearTimeout(holdTimer);
+      return;
+    }
+
+    stampMsg.textContent = "⏳ Please hold still...";
+    holdTimer = setTimeout(() => applyStamp(), stableTimeMs);
   }
-  stampMsg.textContent="⏳ Please hold still...";
-  holdTimer=setTimeout(()=>{
-    if(touchCount>=2) applyStamp();
-    else stampMsg.textContent="❌ Please Try Again";
-  },stableTimeMs);
 });
-stampStage.addEventListener("touchmove",e=>{touchCount=e.touches.length;});
-stampStage.addEventListener("touchend",e=>{
-  touchCount=e.touches.length;
-  if(touchCount<2){
-    clearTimeout(holdTimer);
-    if(!userData.stamps.includes(currentBoothIndex))
-      stampMsg.textContent="Tap here to stamp!";
+
+stampStage.addEventListener("touchend", (e) => {
+  clearTimeout(holdTimer);
+  if (e.touches.length === 0 && !userData.stamps.includes(currentBoothIndex)) {
+    stampMsg.textContent = "Tap here to stamp!";
   }
 });
 
