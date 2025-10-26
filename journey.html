@@ -7,8 +7,8 @@
 <style>
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #f6f9f6;
-  color: #2e4d36;
+  background-color: #F5F2EA;
+  color: #4B6A4F;
   margin: 0;
   padding: 0;
   display: flex;
@@ -16,7 +16,7 @@ body {
   align-items: center;
 }
 header {
-  background-color: #a7d7a9;
+  background-color: #4B6A4F;
   color: white;
   text-align: center;
   width: 100%;
@@ -30,12 +30,12 @@ header {
   margin: 20px;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(75, 106, 79, 0.1);
   padding: 20px;
 }
 .progress {
   width: 100%;
-  background: #dcefdc;
+  background: #E1E8E1;
   border-radius: 12px;
   height: 18px;
   margin: 10px 0 20px 0;
@@ -43,32 +43,40 @@ header {
 }
 .progress-bar {
   height: 100%;
-  background-color: #60b66e;
+  background-color: #7CA380;
   width: 0%;
   transition: width 0.3s;
 }
 .section-title {
   text-align: center;
-  color: #2e4d36;
+  color: #4B6A4F;
   font-weight: 600;
   margin-top: 20px;
 }
 #sponsorList {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 14px;
   justify-items: center;
-  padding: 10px 20px;
+  padding: 10px 10px;
+  box-sizing: border-box;
 }
 #sponsorList .booth {
-  width: 130px;
-  height: 130px;
-  background: linear-gradient(145deg, #f7f3dc, #ede6bb);
-  border: 2px dashed #c6b665;
+  width: 100%;
+  max-width: 120px;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(145deg, #f9f8f2, #eceadd);
+  border: 2px dashed #7CA380;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease-in-out;
 }
 #sponsorList .booth:hover {
-  border-color: #d6c24b;
-  box-shadow: 0 6px 15px rgba(200, 180, 60, 0.3);
+  border-color: #4B6A4F;
+  box-shadow: 0 6px 15px rgba(75, 106, 79, 0.25);
 }
 #gameList {
   display: grid;
@@ -80,8 +88,8 @@ header {
 .booth {
   width: 160px;
   height: 160px;
-  background: linear-gradient(145deg, #e9f5ea, #cfe8d1);
-  border: 2px dashed #8cbf92;
+  background: linear-gradient(145deg, #E9F0E9, #DDE6DD);
+  border: 2px dashed #7CA380;
   border-radius: 18px;
   display: flex;
   flex-direction: column;
@@ -94,48 +102,57 @@ header {
 }
 .booth:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 15px rgba(96, 182, 110, 0.25);
-  border-color: #60b66e;
+  box-shadow: 0 6px 15px rgba(75, 106, 79, 0.25);
+  border-color: #4B6A4F;
 }
+
 .booth h4 {
   font-size: 1em;
   font-weight: 600;
-  color: #2e4d36;
+  color: #4B6A4F;
   margin-bottom: 10px;
   text-align: center;
 }
+
 .stamp {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 2px solid #8cbf92;
-  background: #f4faf5;
+  border: 2px solid #7CA380;
+  background: #F5F2EA;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  color: #8cbf92;
+  color: #7CA380;
   transition: all 0.3s ease;
-  box-shadow: inset 0 0 6px rgba(140, 191, 146, 0.3);
+  box-shadow: inset 0 0 6px rgba(124, 163, 128, 0.3);
 }
+
 .stamped {
-  background: radial-gradient(circle at center, #8ff2a2 0%, #60b66e 60%);
-  border: 2px solid #60b66e;
+  background: radial-gradient(circle at center, #D44C4C 0%, #B33E3E 70%);
+  border: 2px solid #B33E3E;
   color: white;
-  box-shadow: 0 0 12px 3px rgba(96, 182, 110, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 12px 3px rgba(212, 76, 76, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
   animation: pulseGlow 1.5s infinite alternate;
 }
+
 @keyframes pulseGlow {
-  from { box-shadow: 0 0 10px 3px rgba(96, 182, 110, 0.4); }
-  to { box-shadow: 0 0 20px 6px rgba(96, 182, 110, 0.8); }
+  from { box-shadow: 0 0 10px 3px rgba(212, 76, 76, 0.4); }
+  to { box-shadow: 0 0 20px 6px rgba(212, 76, 76, 0.8); }
 }
+
 @media (max-width: 500px) {
-  .booth {
-    width: 130px;
-    height: 130px;
+  #sponsorList {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 10px;
+  }
+  #sponsorList .booth {
+    max-width: 100px;
   }
 }
+
 .modal {
   display: none;
   position: fixed;
@@ -146,24 +163,29 @@ header {
   justify-content: center;
   align-items: center;
 }
+
 .modal-content {
-  background: #fff;
+  background: white;
   padding: 20px;
   border-radius: 16px;
   text-align: center;
   position: relative;
+  box-shadow: 0 6px 15px rgba(75, 106, 79, 0.25);
 }
+
 .modal-close {
   position: absolute;
   top: 8px;
   right: 12px;
   cursor: pointer;
   font-weight: bold;
+  color: #4B6A4F;
 }
+
 #stampStage {
   width: 5cm;
   height: 5cm;
-  border: 2px dashed #60b66e;
+  border: 2px dashed #7CA380;
   margin: 20px auto;
   display: flex;
   justify-content: center;
@@ -171,12 +193,75 @@ header {
   position: relative;
   user-select: none;
   cursor: pointer;
+  background-color: #F5F2EA;
 }
+
 #stampMsg {
   position: absolute;
   text-align: center;
   font-size: 1em;
-  color: #60b66e;
+  color: #4B6A4F;
+}
+/* 📘 How to Play Button */
+.how-btn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: #7bbf7b;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: background 0.3s ease;
+  z-index: 1000;
+}
+.how-btn:hover {
+  background: #5da85d;
+}
+
+/* 🌿 Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1001;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+  background-color: #fff;
+  margin: 80px auto;
+  padding: 20px 25px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 480px;
+  font-family: "Poppins", sans-serif;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  color: #2d4030;
+}
+.modal-content h2 {
+  color: #4a944a;
+  text-align: center;
+}
+.modal-body p {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+.close {
+  color: #888;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.close:hover {
+  color: #333;
 }
 </style>
 </head>
@@ -193,6 +278,28 @@ header {
 
   <h3 class="section-title">🎮 Game Booths</h3>
   <div id="gameList"></div>
+</div>
+
+<!-- 📘 How to Play Button -->
+<button id="howToPlayBtn" class="how-btn">📘 How to Play</button>
+
+<!-- 📘 Instruction Modal -->
+<div id="howToPlayModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>♻️ How to Play – Re:Vibe Journey</h2>
+    <div class="modal-body">
+      <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
+      Explore all <b>6 game booths</b> around the event. Complete each activity and tap the booth card here to <b>collect your stamp</b>.</p>
+
+      <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
+      ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!  
+
+      <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
+      Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+
+    </div>
+  </div>
 </div>
 
 <!-- Booth Modal -->
@@ -226,6 +333,16 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const modal = document.getElementById("howToPlayModal");
+const btn = document.getElementById("howToPlayBtn");
+const span = document.querySelector(".close");
+
+btn.onclick = () => modal.style.display = "block";
+span.onclick = () => modal.style.display = "none";
+window.onclick = (event) => {
+  if (event.target == modal) modal.style.display = "none";
+};
+  
 const booths = [
   { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
   { name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", type: "game" },
@@ -268,7 +385,7 @@ function updateBoothLocks() {
   if (gameCount >= 3 && stampedSponsors.length === 0) {
     sponsorIndexes.forEach(i => (booths[i].locked = false));
   }
-  if (stampedSponsors.length === 1 && gameCount >= 4) {
+  if (stampedSponsors.length === 1 && gameCount >= 5) {
     sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
   }
   if (stampedSponsors.length === 2 && gameCount >= 6) {
@@ -352,7 +469,7 @@ stampStage.addEventListener("touchend",e=>{
 
 function applyStamp(){
   if (!currentUser) {
-    stampMsg.textContent = "⚠️ 请先登入以记录进度";
+    stampMsg.textContent = "Please Sign In First";
     return;
   }
   if (userData.stamps.includes(currentBoothIndex)) {
