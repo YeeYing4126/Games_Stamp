@@ -16,10 +16,10 @@ body {
   align-items: center;
 }
 header {
-  background-color: #2A3B27;
+  background-color: #70805D;
   color: #FDFDFD;
   text-align: center;
-  width: 100vw;
+  width: 100%;
   padding: 22px 0;
   font-size: 1.6em;
   font-weight: 600;
@@ -212,8 +212,8 @@ header {
   position: fixed;
   top: 15px;
   right: 15px;
-  background: #2A3B27;
-  color: white;
+  background: #FFD166;
+  color: #2A3B27;
   border: none;
   padding: 10px 16px;
   border-radius: 10px;
@@ -224,7 +224,7 @@ header {
   z-index: 2000;
 }
 .how-btn:hover {
-  background: #70805D;
+  background: #FFE59A;
 }
 .howToPlayModal {
   position: fixed;
@@ -265,6 +265,7 @@ header {
   margin: 10px 0;
   line-height: 1.6;
   font-size: 0.95rem;
+  text-align: justify;
 }
 #howToPlayModal .close {
   position: absolute;
@@ -300,21 +301,18 @@ header {
 <button id="howToPlayBtn" class="how-btn">📘 How to Play</button>
 
 <!-- 📘 Instruction Modal -->
-<div id="howToPlayModal" class="howToPlayModal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>♻️ How to Play – Re:Vibe Journey</h2>
-    <div class="modal-body">
-      <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
-      Explore all <b>6 game booths</b> around the event. Complete each activity and tap the booth card here to <b>collect your stamp</b>.</p>
+<div id="howToPlayModal" class="howToPlayModal hidden">
+  <span class="close">&times;</span>
+  <h2>♻️ How to Play – Re:Vibe Journey</h2>
+  <div class="modal-body">
+    <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
+    Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
 
-      <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
-      ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!  
+    <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
+    ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!</p>
 
-      <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
-      Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
-
-    </div>
+    <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
+    Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
   </div>
 </div>
 
@@ -539,8 +537,19 @@ onAuthStateChanged(auth, async user=>{
     currentUser=user;
     const docRef=doc(db,"journeys",user.uid);
     const docSnap=await getDoc(docRef);
-    if(docSnap.exists()) userData=docSnap.data();
-    else await setDoc(docRef,userData);
+    
+    if (docSnap.exists()) {
+      userData = docSnap.data();
+      if (!userData.hasSeenHowToPlay) {
+        howToPlayModal.style.display = "block";
+        userData.hasSeenHowToPlay = true;
+        await setDoc(docRef, userData);
+      }
+    } else {
+      await setDoc(docRef, { stamps: [], hasSeenHowToPlay: true });
+      howToPlayModal.style.display = "block";
+    }
+
     updateBoothLocks();
     renderBooths();
   } else {
