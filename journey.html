@@ -216,7 +216,7 @@ header {
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   transition: background 0.3s ease;
-  z-index: 1000;
+  z-index: 2000;
 }
 .how-btn:hover {
   background: #5da85d;
@@ -345,8 +345,6 @@ const booths = [
   { name: "Sponsors 3", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true }
 ];
   
-const btn = document.getElementById("howToPlayBtn");
-const span = document.querySelector(".close");
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
 const modal = document.getElementById("boothModal");
@@ -357,11 +355,15 @@ const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
 
-btn.onclick = () => modal.style.display = "block";
-span.onclick = () => modal.style.display = "none";
-window.onclick = (event) => {
-  if (event.target == modal) modal.style.display = "none";
-};
+const howToPlayBtn = document.getElementById("howToPlayBtn");
+const howToPlayModal = document.getElementById("howToPlayModal");
+const howToPlayClose = howToPlayModal.querySelector(".close");
+
+howToPlayBtn.onclick = () => howToPlayModal.style.display = "block";
+howToPlayClose.onclick = () => howToPlayModal.style.display = "none";
+window.addEventListener("click", (event) => {
+  if (event.target === howToPlayModal) howToPlayModal.style.display = "none";
+});
 
 let userData = { stamps: [] };
 let currentUser = null;
@@ -475,7 +477,7 @@ stampStage.addEventListener("touchend",e=>{
   }
 });
 
-function applyStamp(){
+function applyStamp() {
   if (!currentUser) {
     stampMsg.textContent = "Please Sign In First";
     return;
@@ -485,19 +487,28 @@ function applyStamp(){
     return;
   }
 
+  // ✅ Add stamp and save immediately
   userData.stamps.push(currentBoothIndex);
   saveProgress();
   stampSound.play();
 
-  const stampEl = document.querySelector(".modal-content .stamp");
   stampMsg.textContent = "🎉 Stamped Successfully!";
-  stampEl.classList.add("stamped");
 
-  // Temporary visual glow feedback on stampStage
+  // 🔥 Instantly update booth card visually without refresh
+  updateBoothLocks();
+  renderBooths();
+
+  // 🔥 Animate the stamping stage for fun
   stampStage.style.animation = "pulseGlow 1.5s ease-in-out";
   setTimeout(() => {
     stampStage.style.animation = "";
   }, 1500);
+
+  // ✅ Optional: auto-close modal after short delay
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 1200);
+}
 
   updateBoothLocks();
   renderBooths();
