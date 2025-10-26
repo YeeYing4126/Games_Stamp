@@ -332,16 +332,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-const modal = document.getElementById("howToPlayModal");
-const btn = document.getElementById("howToPlayBtn");
-const span = document.querySelector(".close");
-
-btn.onclick = () => modal.style.display = "block";
-span.onclick = () => modal.style.display = "none";
-window.onclick = (event) => {
-  if (event.target == modal) modal.style.display = "none";
-};
   
 const booths = [
   { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
@@ -354,7 +344,9 @@ const booths = [
   { name: "Create Your Own Monalisa", desc: "Use egg trays to paint art.", type: "game" },
   { name: "Sponsors 3", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true }
 ];
-
+  
+const btn = document.getElementById("howToPlayBtn");
+const span = document.querySelector(".close");
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
 const modal = document.getElementById("boothModal");
@@ -364,6 +356,12 @@ const modalBoothDesc = document.getElementById("modalBoothDesc");
 const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
+
+btn.onclick = () => modal.style.display = "block";
+span.onclick = () => modal.style.display = "none";
+window.onclick = (event) => {
+  if (event.target == modal) modal.style.display = "none";
+};
 
 let userData = { stamps: [] };
 let currentUser = null;
@@ -376,25 +374,35 @@ async function saveProgress() {
 }
 
 function updateBoothLocks() {
-  const gameCount = userData.stamps.filter(i => booths[i] && booths[i].type === "game").length;
-  const sponsorIndexes = booths.map((b, i) => (b.type === "sponsor" ? i : null)).filter(i => i !== null);
+  const gameCount = userData.stamps.filter(i => booths[i]?.type === "game").length;
+  const sponsorIndexes = booths.map((b, i) => b.type === "sponsor" ? i : null).filter(i => i !== null);
   const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
 
+  // Lock all first
   sponsorIndexes.forEach(i => (booths[i].locked = true));
 
   if (gameCount >= 3 && stampedSponsors.length === 0) {
+    // Unlock all sponsors when 3 games done
     sponsorIndexes.forEach(i => (booths[i].locked = false));
+  } 
+  else if (stampedSponsors.length === 1 && gameCount < 5) {
+    // After first sponsor stamped but before 5 games done → lock others
+    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = true));
   }
-  if (stampedSponsors.length === 1 && gameCount >= 5) {
+  else if (gameCount >= 5 && stampedSponsors.length === 1) {
+    // Unlock remaining 2 sponsors
     sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
   }
-  if (stampedSponsors.length === 2 && gameCount >= 6) {
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
+  else if (stampedSponsors.length === 2 && gameCount < 6) {
+    // Lock last sponsor again until 6 games done
+    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = true));
   }
-  if (stampedSponsors.length === sponsorIndexes.length) {
-    sponsorIndexes.forEach(i => (booths[i].locked = false));
+  else if (gameCount >= 6 && stampedSponsors.length === 2) {
+    // Unlock final sponsor
+    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
   }
 }
+
 
 function renderBooths() {
   const sponsorList = document.getElementById("sponsorList");
