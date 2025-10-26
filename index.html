@@ -5,16 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Start My Journey</title>
   <script type="module">
-    // ✅ Import Firebase SDK modules correctly
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
 
-    // ✅ Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
       authDomain: "sustainable12.firebaseapp.com",
-      databaseURL: "https://sustainable12-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "sustainable12",
       storageBucket: "sustainable12.appspot.com",
       messagingSenderId: "905147566179",
@@ -22,49 +19,37 @@
       measurementId: "G-HVNWTXWPH4"
     };
 
-    // ✅ Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const auth = getAuth(app);
 
-    // ✅ Providers
     const googleProvider = new GoogleAuthProvider();
     const microsoftProvider = new OAuthProvider("microsoft.com");
     const yahooProvider = new OAuthProvider("yahoo.com");
 
-    // ✅ Sign-in button logic
+    // ✅ Sign-in button
     window.startJourney = async () => {
       const providers = [googleProvider, microsoftProvider, yahooProvider];
-      let user = null;
-
       for (const provider of providers) {
         try {
-          const result = await signInWithPopup(auth, provider);
-          user = result.user;
-          break; // stop after first success
+          await signInWithPopup(auth, provider);
+          // Wait for onAuthStateChanged to trigger redirect
+          return;
         } catch (error) {
-          if (error.code !== "auth/popup-closed-by-user") {
-            console.error(error);
-          }
+          console.error("Sign-in error:", error.code, error.message);
+          if (error.code === "auth/popup-closed-by-user") return;
         }
       }
-
-      if (user) {
-        window.location.href = "./journey.html";
-      } else {
-        alert("Sign-in failed or canceled. Please try again.");
-      }
+      alert("Sign-in failed or canceled. Please try again.");
     };
 
-onAuthStateChanged(auth, (user) => {
-  document.body.innerHTML = "<h1>Loading your journey...</h1>";
-  setTimeout(() => {
-    if (auth.currentUser) {
-      window.location.href = "./journey.html";
-    }
-  }, 800);
-});
-
+    // ✅ Only run redirect *after* Firebase confirms user login
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.body.innerHTML = "<h1>Loading your journey...</h1>";
+        setTimeout(() => window.location.href = "./journey.html", 800);
+      }
+    });
   </script>
 
   <style>
