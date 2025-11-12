@@ -533,7 +533,15 @@ function renderBooths() {
 }
 function openModal(booth,index){
   modalBoothName.innerText = booth.name;
-  modalBoothDesc.innerText = booth.desc;
+
+  let descHtml = "";
+  if (Array.isArray(booth.desc)) {
+    descHtml = booth.desc.map(line => `<p>${line}</p>`).join("");
+  } else {
+    descHtml = `<p>${booth.desc}</p>`;
+  }
+  modalBoothDesc.innerHTML = descHtml; // <-- use innerHTML
+
   stampMsg.textContent = userData.stamps.includes(index) ? "✅ Already stamped!" : "Tap here to stamp!";
   modal.style.display = "flex";
   currentBoothIndex = index;
