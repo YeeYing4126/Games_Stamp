@@ -498,27 +498,39 @@ function renderBooths() {
   const gameList = document.getElementById("gameList");
   sponsorList.innerHTML = "";
   gameList.innerHTML = "";
-  booths.forEach((b,i)=>{
+  
+  booths.forEach((b, i) => {
     const stamped = userData.stamps.includes(i);
     const div = document.createElement("div");
     div.className = "booth";
     const stampSymbol = b.type === "sponsor" && stamped ? "🎁" : stamped ? "✓" : "";
+
+    // Convert description array or string into <p> elements
+    let descHtml = "";
+    if (Array.isArray(b.desc)) {
+      descHtml = b.desc.map(line => `<p>${line}</p>`).join("");
+    } else {
+      descHtml = `<p>${b.desc}</p>`;
+    }
+
     div.innerHTML = `
       <h4>${b.name}</h4>
       <div class="stamp ${stamped ? "stamped" : ""}">${stampSymbol}</div>
       <div class="booth-desc">${descHtml}</div>
     `;
+
     div.style.opacity = b.locked ? "0.4" : "1";
     div.style.pointerEvents = b.locked ? "none" : "auto";
-    div.onclick = ()=>openModal(b,i);
+    div.onclick = () => openModal(b, i);
+
     if (b.type === "sponsor") sponsorList.appendChild(div);
     else gameList.appendChild(div);
   });
+
   const progress = Math.round((userData.stamps.length / booths.length) * 100);
   progressBar.style.width = progress + "%";
   progressText.innerText = `You have collected ${userData.stamps.length} of ${booths.length} stamps`;
 }
-
 function openModal(booth,index){
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerText = booth.desc;
