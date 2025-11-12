@@ -348,15 +348,88 @@ const auth = getAuth(app);
 const db = getFirestore(app);
   
 const booths = [
-  { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
-  { name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", type: "game" },
-  { name: "Eco Monopoly", desc: "Roll dice and answer questions to move forward.", type: "game" },
-  { name: "Sponsors 1", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true },
-  { name: "DIY Phone Holder", desc: "Reuse materials to craft an eco item.", type: "game" },
-  { name: "Trash Bowling", desc: "Knock down non-recyclable trash bottles.", type: "game" },
-  { name: "Sponsors 2", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true },
-  { name: "Create Your Own Monalisa", desc: "Use egg trays to paint art.", type: "game" },
-  { name: "Sponsors 3", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true }
+  {
+    name: "Waste Sorting Challenge",
+    desc: [
+      "🌿 Refresh your recycling skills!", // row 1, bold
+      "Drag or pick each waste card into its correct bin", // row 2
+      "— Recyclable, Organic, or General Waste.", // row 3
+      "Sort everything correctly to earn your stamp.", // row 4
+      "✨ Let’s rethink waste the Re:Vibe way!" // row 5
+    ],
+    type: "game",
+  },
+  {
+    name: "Sugar Shock Guess",
+    desc: [
+      "🍬 How much sugar is hiding in your drink?", // bold
+      "Add spoonfuls of sugar until you think it matches one canned drink.", 
+      "Then, we’ll reveal the real amount 😳", 
+      "Get close enough to earn your stamp", 
+      "— and rethink your next sip!"
+    ],
+    type: "game",
+  },
+  {
+    name: "Green-nopoly",
+    desc: [
+      "🎲 Roll. Learn. Refresh the way you live.", // bold
+      "1️⃣ Roll the dice to start your journey.", 
+      "2️⃣ Move to the space shown.", 
+      "3️⃣ Complete the task or answer the question.", 
+      "Get it right → roll again and keep vibing! Finish one full round to earn your stamp 🌱"
+    ],
+    type: "game",
+  },
+  { 
+    name: "Sponsors 1", 
+    desc: "🎁 Redeem a small gift here!", 
+    type: "sponsor", 
+    locked: true 
+  },
+  {
+    name: "DIY Phone Holder / Lifestyle Deco",
+    desc: [
+      "📱 Turn scraps into something cute + useful!", // bold
+      "Pick your materials, assemble your holder, and decorate it your way.", 
+      "Once your creation stands on its own, collect your stamp.", 
+      "Reuse, refresh, repeat ♻️🎨"
+    ],
+    type: "game",
+  },
+  {
+    name: "Trash Bowling",
+    desc: [
+      "🎳 Strike out bad habits!", // bold
+      "1️⃣ Pick the 10 non-eco-friendly bottles from the set.", 
+      "2️⃣ Show them to our crew for a quick check.", 
+      "3️⃣ Bowl your ball — you get 3 tries!", 
+      "Knock down the “bad habits” to earn your stamp and roll into a greener vibe 💚"
+    ],
+    type: "game",
+  },
+  { 
+    name: "Sponsors 2", 
+    desc: "🎁 Redeem a small gift here!", 
+    type: "sponsor", 
+    locked: true 
+  },
+  {
+    name: "Create Your Own Monalisa",
+    desc: [
+      "🎨 Paint, play, and re-create — Re:Vibe style!", // bold
+      "Use egg trays as your canvas and paint your pattern your way.", 
+      "Once your masterpiece is done, your stamp awaits.", 
+      "Upcycle your creativity 🌸♻️"
+    ],
+    type: "game",
+  },
+  { 
+    name: "Sponsors 3", 
+    desc: "🎁 Redeem a small gift here!", 
+    type: "sponsor", 
+    locked: true 
+  }
 ];
   
 const progressBar = document.getElementById("progressBar");
