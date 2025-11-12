@@ -356,7 +356,7 @@ const booths = [
       "— Recyclable, Organic, or General Waste.", // row 3
       "Sort everything correctly to earn your stamp.", // row 4
       "✨ Let’s rethink waste the Re:Vibe way!" // row 5
-    ]
+    ],
     type: "game",
   },
   {
@@ -367,7 +367,7 @@ const booths = [
       "Then, we’ll reveal the real amount 😳", 
       "Get close enough to earn your stamp", 
       "— and rethink your next sip!"
-    ]
+    ],
     type: "game",
   },
   {
@@ -378,7 +378,7 @@ const booths = [
       "2️⃣ Move to the space shown.", 
       "3️⃣ Complete the task or answer the question.", 
       "Get it right → roll again and keep vibing! Finish one full round to earn your stamp 🌱"
-    ]
+    ],
     type: "game",
   },
   { 
@@ -394,7 +394,7 @@ const booths = [
       "Pick your materials, assemble your holder, and decorate it your way.", 
       "Once your creation stands on its own, collect your stamp.", 
       "Reuse, refresh, repeat ♻️🎨"
-    ]
+    ],
     type: "game",
   },
   {
@@ -405,7 +405,7 @@ const booths = [
       "2️⃣ Show them to our crew for a quick check.", 
       "3️⃣ Bowl your ball — you get 3 tries!", 
       "Knock down the “bad habits” to earn your stamp and roll into a greener vibe 💚"
-    ]
+    ],
     type: "game",
   },
   { 
@@ -421,7 +421,7 @@ const booths = [
       "Use egg trays as your canvas and paint your pattern your way.", 
       "Once your masterpiece is done, your stamp awaits.", 
       "Upcycle your creativity 🌸♻️"
-    ]
+    ],
     type: "game",
   },
   { 
@@ -455,15 +455,6 @@ window.addEventListener("click", (event) => {
 let userData = { stamps: [] };
 let currentUser = null;
 let currentBoothIndex = null;
-let descHtml = '';
-if (Array.isArray(b.desc)) {
-  descHtml = b.desc.map((line, idx) => {
-    if(idx === 0) return `<div style="font-weight:bold;">${line}</div>`; // first row bold
-    return `<div>${line}</div>`; // other rows normal
-  }).join('');
-} else {
-  descHtml = `<div>${b.desc}</div>`;
-}
 
 async function saveProgress() {
   if (!currentUser) return;
