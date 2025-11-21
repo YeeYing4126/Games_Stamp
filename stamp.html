@@ -21,15 +21,17 @@ body {
   color: #B85437;
 }
 header {
-  background-color: #F698DB; /* Pink heading */
+  background-color: transparent; 
   text-align: center;
   width: 100%;
-  padding: 24px 0;
-  font-size: 1.6em;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-  color: white;
+  padding: 0;
+  box-shadow: none;
+}
+.header-logo {
+  width: 100%;
+  max-width: 320px; /* Adjust size */
+  display: block;
+  margin: 20px auto;
 }
 .container {
   max-width: 480px;
@@ -267,7 +269,9 @@ header {
 </head>
 <body>
   
-<header>url('ReVibe Logo_Transparent Background.png') no-repeat center center fixed;</header>
+<header>
+  <img src="logo.png" alt="ReVibe Logo" class="header-logo">
+</header>
 
 <div class="container" id="mainApp">
   <div id="progressText"></div>
