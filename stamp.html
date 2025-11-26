@@ -6,62 +6,142 @@
 <title>My Journey – Re:vibe</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=LazyDog&display=swap'); /* Keep LazyDog as PC */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap'); /* placeholder for Gliker */
-  
+@import url('https://fonts.googleapis.com/css2?family=LazyDog&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+
 body {
   font-family: 'Gaegu', sans-serif;
   background: url('Background.png') no-repeat center center fixed;
   background-size: cover;
-  margin: 0; padding: 0;
-  display: flex; flex-direction: column; align-items: center;
+  margin: 0; 
+  padding: 0;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center;
   color: #B85437;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.8); /* improves visibility on bright background */
 }
+
 header {
   background-color: transparent;
   text-align: center;
   width: 100%;
   padding: 0;
 }
+
 .header-logo {
-  width: 200px; /* smaller logo */
+  width: 200px; 
   display: block;
   margin: 20px auto;
 }
+
 .container {
   max-width: 480px;
   width: 100%;
   margin: 25px 0;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.95); /* slightly more opaque */
   border-radius: 20px;
   box-shadow: 0 6px 18px rgba(85,115,141,0.25);
   padding: 24px;
 }
-.progress { width: 100%; background: #AFDFEE; border-radius: 14px; height: 20px; margin: 12px 0 25px 0; overflow: hidden;}
+  
+.progress { 
+  width: 100%; 
+  background: #AFDFEE; 
+  border-radius: 14px; 
+  height: 20px; 
+  margin: 12px 0 25px 0; 
+  overflow: hidden;
+}
+  
+.progress-bar {
+  height:100%;
+  background:linear-gradient(270deg,#FFD058,#92D1FF,#E1EEAF);
+  background-size:200% 100%;
+  width:0%;
+  transition: width 0.6s ease;
+  animation: progressMove 4s linear infinite;
+  border-radius:14px;
+}
+  
+.section-title { 
+  text-align:center; 
+  font-family:'Roboto', sans-serif; 
+  font-weight:bold; 
+  color:#ff7aa2; 
+  margin:25px 0 10px; 
+  font-size:1.2rem;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.8); /* clearer */
+}
 
-.progress-bar {height:100%;background:linear-gradient(270deg,#FFD058,#92D1FF,#E1EEAF);background-size:200% 100%;width:0%;transition: width 0.6s ease;animation: progressMove 4s linear infinite;border-radius:14px;}
-
-.section-title { text-align:center; font-family:'Roboto', sans-serif; font-weight:bold; color:#ff7aa2; margin:25px 0 10px; font-size:1.2rem;}
-
-#sponsorList, #gameList { display:grid; gap:14px; justify-items:center; padding:10px; grid-template-columns: repeat(auto-fit,minmax(100px,1fr)); }
-
-.booth { width:150px; height:150px; background:linear-gradient(145deg,#FFE485,#FFD058); border:2px dashed #AFDFEE; border-radius:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:all 0.25s ease-in-out; box-shadow:0 3px 8px rgba(0,0,0,0.05); cursor:pointer; position:relative; }
+#sponsorList, #gameList { 
+  display:grid; 
+  gap:14px; 
+  justify-items:center; 
+  padding:10px; 
+  grid-template-columns: repeat(auto-fit,minmax(100px,1fr)); 
+}
+  
+.booth { 
+  width:150px; 
+  height:150px; 
+  background:linear-gradient(145deg,#FFE485,#FFD058); 
+  border:2px dashed #AFDFEE; 
+  border-radius:20px; 
+  display:flex; 
+  flex-direction:column; 
+  align-items:center; 
+  justify-content:center; 
+  transition:all 0.25s ease-in-out; 
+  box-shadow:0 3px 8px rgba(0,0,0,0.05); 
+  cursor:pointer; 
+  position:relative; 
+  color: #B85437; /* ensures booth text visible */
+}
 
 .booth:hover {
   transform: translateY(-4px);
   border-color: #E1EEAF;
   box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
-.booth h4 { font-family:'LazyDog', cursive; font-size:1em; font-weight:600; color:#B85437; margin-bottom:10px; text-align:center; }
+.booth h4 { 
+  font-family:'LazyDog', cursive; 
+  font-size:1em; 
+  font-weight:600; 
+  color:#B85437; 
+  margin-bottom:10px; 
+  text-align:center; 
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.8); /* visible on gradient */
+}
+.stamp { 
+  width:30mm; 
+  height:30mm; 
+  border-radius:50%; 
+  border:2px solid #F698DB; 
+  background:#FFD3E4; 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  font-size:20px; 
+  color:#F72967; 
+  transition:all 0.3s ease; 
+}
 
-.stamp { width:30mm; height:30mm; border-radius:50%; border:2px solid #F698DB; background:#FFD3E4; display:flex; align-items:center; justify-content:center; font-size:20px; color:#F72967; transition:all 0.3s ease; }
+.stamped { 
+  transform:scale(1.1); 
+  animation:pulseGlow 1.5s infinite alternate; 
+  border:none; 
+  background:none; 
+}
+@keyframes pulseGlow { 
+  from { box-shadow:0 0 10px 2px rgba(187,172,221,0.3);} 
+  to { box-shadow:0 0 20px 6px rgba(246,152,219,0.7);} 
+}
 
-.stamped { transform:scale(1.1); animation:pulseGlow 1.5s infinite alternate; border:none; background:none; }
-
-@keyframes pulseGlow { from { box-shadow:0 0 10px 2px rgba(187,172,221,0.3);} to { box-shadow:0 0 20px 6px rgba(246,152,219,0.7);} }
-
-@keyframes progressMove { 0% { background-position:200% 0;} 100% { background-position:-200% 0;} }
-
+@keyframes progressMove { 
+  0% { background-position:200% 0;}  
+  100% { background-position:-200% 0;} 
+}
 @media (max-width: 500px) {
   #sponsorList {
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
@@ -80,10 +160,28 @@ header {
 .modal-close:hover {
   color: #2A3B27;
 }
-#stampStage { width:5cm; height:5cm; border:2px dashed #46C6D7; margin:20px auto; display:flex; justify-content:center; align-items:center; background-color:#FFD3E4; border-radius:10px; user-select:none; cursor:pointer; position:relative; }
-
-#stampMsg { text-align:center; font-size:1em; color:#2A3B27;}
-
+#stampStage { 
+  width:5cm; 
+  height:5cm; 
+  border:2px dashed #46C6D7; 
+  margin:20px auto; 
+  display:flex; 
+  justify-content:center; 
+  align-items:center; 
+  background-color:#FFD3E4; 
+  border-radius:10px; 
+  user-select:none; 
+  cursor:pointer; 
+  position:relative; 
+  color:#2A3B27; 
+  font-weight:bold; 
+}
+#stampMsg { 
+  text-align:center; 
+  font-size:1em; 
+  color:#2A3B27; 
+  text-shadow: 1px 1px 1px #fff; 
+}
 .how-btn {
   position: fixed;
   top: 15px;
