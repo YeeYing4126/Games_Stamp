@@ -75,23 +75,6 @@ header {
   justify-items: center;
   padding: 10px 10px;
 }
-#sponsorList .booth {
-  width: 100%;
-  max-width: 120px;
-  aspect-ratio: 1 / 1;
-  background: linear-gradient(145deg, #F7F7F5, #EAEAEA);
-  border: 2px dashed #96A7B6; /* Cadet Gray */
-  border-radius: 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s ease-in-out;
-}
-#sponsorList .booth:hover {
-  border-color: #70805D; /* French Lilac */
-  box-shadow: 0 6px 15px rgba(112, 128, 93, 0.35);
-}
 #gameList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -154,15 +137,6 @@ header {
 @keyframes progressMove {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
-}
-@media (max-width: 500px) {
-  #sponsorList {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 10px;
-  }
-  #sponsorList .booth {
-    max-width: 100px;
-  }
 }
 .modal {
   display: none;
@@ -276,11 +250,8 @@ header {
 <div class="container" id="mainApp">
   <div id="progressText"></div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-  
-  <h3 class="section-title">🎁 Sponsors Booths</h3>
-  <div id="sponsorList"></div>
 
-  <h3 class="section-title">🎮 Game Booths</h3>
+  <h3 class="section-title">Game Booths</h3>
   <div id="gameList"></div>
 </div>
 
@@ -312,7 +283,7 @@ header {
     <div id="stampStage">
       <span id="stampMsg">Tap here to stamp!</span>
     </div>
-    <audio id="stampSound" src="Revibe.mp3" preload="auto"></audio>
+    <audio id="stampSound" src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/Revibe.mp3" preload="auto"></audio>
   </div>
 </div>
 
@@ -368,12 +339,6 @@ const booths = [
     ],
     type: "game",
   },
-  { 
-    name: "Sponsors 1", 
-    desc: "🎁 Redeem a small gift here!", 
-    type: "sponsor", 
-    locked: true 
-  },
   {
     name: "DIY Phone Holder / Lifestyle Deco",
     desc: [
@@ -395,12 +360,6 @@ const booths = [
     ],
     type: "game",
   },
-  { 
-    name: "Sponsors 2", 
-    desc: "🎁 Redeem a small gift here!", 
-    type: "sponsor", 
-    locked: true 
-  },
   {
     name: "Create Your Own Monalisa",
     desc: [
@@ -411,12 +370,6 @@ const booths = [
     ],
     type: "game",
   },
-  { 
-    name: "Sponsors 3", 
-    desc: "🎁 Redeem a small gift here!", 
-    type: "sponsor", 
-    locked: true 
-  }
 ];
   
 const progressBar = document.getElementById("progressBar");
@@ -448,37 +401,6 @@ async function saveProgress() {
   const docRef = doc(db, "journeys", currentUser.uid);
   await setDoc(docRef, userData);
 }
-
-function updateBoothLocks() {
-  const gameCount = userData.stamps.filter(i => booths[i]?.type === "game").length;
-  const sponsorIndexes = booths.map((b, i) => b.type === "sponsor" ? i : null).filter(i => i !== null);
-  const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
-
-  // Lock all first
-  sponsorIndexes.forEach(i => (booths[i].locked = true));
-
-  if (gameCount >= 3 && stampedSponsors.length === 0) {
-    // Unlock all sponsors when 3 games done
-    sponsorIndexes.forEach(i => (booths[i].locked = false));
-  } 
-  else if (stampedSponsors.length === 1 && gameCount < 5) {
-    // After first sponsor stamped but before 5 games done → lock others
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = true));
-  }
-  else if (gameCount >= 5 && stampedSponsors.length === 1) {
-    // Unlock remaining 2 sponsors
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
-  }
-  else if (stampedSponsors.length === 2 && gameCount < 6) {
-    // Lock last sponsor again until 6 games done
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = true));
-  }
-  else if (gameCount >= 6 && stampedSponsors.length === 2) {
-    // Unlock final sponsor
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
-  }
-}
-
 
 function renderBooths() {
   const sponsorList = document.getElementById("sponsorList");
