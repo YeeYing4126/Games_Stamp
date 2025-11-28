@@ -164,6 +164,9 @@ header {
 .modal-close:hover {
   color: #2A3B27;
 }
+* {
+  box-sizing: border-box;
+}
 #stampStage {
   width: 5cm;
   height: 5cm;
@@ -418,12 +421,12 @@ function openModal(booth,index){
     0: "stamp_waste.png",
     1: "stamp_sugar.png",
     2: "stamp_green.png",
-    4: "stamp_phone.png",
-    5: "stamp_bowling.png",
-    7: "stamp_monalisa.png",
+    3: "stamp_phone.png",
+    4: "stamp_bowling.png",
+    5: "stamp_monalisa.png",
   };
   modalBoothName.innerText = booth.name;
-   modalBoothDesc.innerHTML = Array.isArray(booth.desc)
+  modalBoothDesc.innerHTML = Array.isArray(booth.desc)
     ? booth.desc.map(line => `<p>${line}</p>`).join("")
     : `<p>${booth.desc}</p>`;
 
@@ -469,8 +472,8 @@ stampStage.addEventListener("touchstart", e=>{
   },stableTimeMs);
 });
 stampStage.addEventListener("touchmove",e=>{touchCount=e.touches.length;});
-stampStage.addEventListener("touchend",e=>{
-  touchCount=e.touches.length;
+stampStage.addEventListener("touchend", e => {
+  touchCount = e.touches.length;
   if(touchCount<2){
     clearTimeout(holdTimer);
     if(!userData.stamps.includes(currentBoothIndex))
@@ -524,9 +527,9 @@ onAuthStateChanged(auth, async user => {
     currentUser = user;
     const docRef = doc(db, "journeys", user.uid);
     const snap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      userData = docSnap.data();
+
+    if (snap.exists()) {  // fix here
+      userData = snap.data();
       if (!userData.hasSeenHowToPlay) {
         howToPlayModal.style.display = "block";
         userData.hasSeenHowToPlay = true;
@@ -537,6 +540,7 @@ onAuthStateChanged(auth, async user => {
       howToPlayModal.style.display = "block";
     }
 
+    renderBooths(); // make sure to render after loading data
   } else {
     alert("Please Sign In First");
     window.location.href = "index.html";
