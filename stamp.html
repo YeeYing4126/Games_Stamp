@@ -29,7 +29,7 @@ header {
 }
 .header-logo {
   width: 100%;
-  max-width: 320px; /* Adjust size */
+  max-width: 320px;
   display: block;
   margin: 20px auto;
 }
@@ -37,7 +37,7 @@ header {
   max-width: 480px;
   width: 100%;
   margin: 25px 0;
-  background: rgba(255, 255, 255, 0.9); /* Slightly transparent white so bg shows through */
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 20px;
   box-shadow: 0 6px 18px rgba(85, 115, 141, 0.25);
   padding: 24px;
@@ -78,8 +78,8 @@ header {
 .booth {
   width: 150px;
   height: 150px;
-  background: linear-gradient(145deg, #FFE485, #FFD058); /* Yellow gradient */
-  border: 2px dashed #AFDFEE; /* Blue border */
+  background: linear-gradient(145deg, #FFE485, #FFD058);
+  border: 2px dashed #AFDFEE;
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -107,17 +107,17 @@ header {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 2px solid #F698DB; /* Pink border */
-  background: #FFD3E4; /* Pink background */
+  border: 2px solid #F698DB;
+  background: #FFD3E4;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  color: #F72967; /* Dark Pink */
+  color: #F72967;
   transition: all 0.3s ease;
 }
 .stamped {
-  background: radial-gradient(circle at center, #46C6D7 0%, #92D1FF 80%); /* Blue gradient */
+  background: radial-gradient(circle at center, #46C6D7 0%, #92D1FF 80%);
   border: 2px solid #46C6D7;
   color: #fff;
   transform: scale(1.1);
@@ -202,25 +202,21 @@ header {
   z-index: 2000;
 }
 .how-btn:hover {
-  background: #FFE485; /* Lighter yellow */
+  background: #FFE485;
 }
 .howToPlayModal {
+  display: none;
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
   z-index: 1000;
-  background: #FFBDB4;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  width: 90%;
-  max-width: 400px;
-  text-align: left;
-  transition: all 0.3s ease;
+  justify-content: center;
+  align-items: center;
 }
-.howToPlayModal.hidden { display: none; }
-#howToPlayModal .modal-content {
+.howToPlayModal .modal-content {
   background: #FFD3E4;
   text-align: left;
   padding: 30px;
@@ -229,12 +225,46 @@ header {
   max-width: 480px;
   box-shadow: 0 8px 25px rgba(42,59,39,0.25);
   position: relative;
-  transform: translateY(0);
 }
-#howToPlayModal h2 { color: #46C6D7; text-align: center; margin-bottom: 15px; }
-#howToPlayModal .modal-body p { color: #2A3B27; margin: 10px 0; line-height: 1.6; font-size: 0.95rem; text-align: justify; }
-#howToPlayModal .close { position: absolute; top: 12px; right: 16px; font-size: 26px; font-weight: bold; color: #E1EEAF; cursor: pointer; transition: color 0.3s; }
-#howToPlayModal .close:hover { color: #2A3B27; }
+.howToPlayModal h2 { 
+  color: #46C6D7; 
+  text-align: center; 
+  margin-bottom: 15px; 
+  font-family: 'Gliker', sans-serif;
+}
+.howToPlayModal .modal-body p { 
+  color: #2A3B27; 
+  margin: 10px 0; 
+  line-height: 1.6; 
+  font-size: 0.95rem; 
+  text-align: justify; 
+}
+.howToPlayModal .close { 
+  position: absolute; 
+  top: 12px; 
+  right: 16px; 
+  font-size: 26px; 
+  font-weight: bold; 
+  color: #46C6D7; 
+  cursor: pointer; 
+  transition: color 0.3s; 
+}
+.howToPlayModal .close:hover { 
+  color: #2A3B27; 
+}
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #B85437;
+}
+.error {
+  text-align: center;
+  padding: 20px;
+  color: #ff0000;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  margin: 20px;
+}
 </style>
 </head>
 <body>
@@ -244,29 +274,33 @@ header {
 </header>
 
 <div class="container" id="mainApp">
-  <div id="progressText"></div>
+  <div id="progressText">Loading your journey...</div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 
   <h3 class="section-title">Game Booths</h3>
-  <div id="gameList"></div>
+  <div id="gameList">
+    <div class="loading">Loading game booths...</div>
+  </div>
 </div>
 
 <!-- 📘 How to Play Button -->
 <button id="howToPlayBtn" class="how-btn">📘 How to Play</button>
 
 <!-- 📘 Instruction Modal -->
-<div id="howToPlayModal" class="howToPlayModal hidden">
-  <span class="close">&times;</span>
-  <h2>♻️ How to Play – Re:Vibe Journey</h2>
-  <div class="modal-body">
-    <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
-    Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
+<div id="howToPlayModal" class="howToPlayModal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>♻️ How to Play – Re:Vibe Journey</h2>
+    <div class="modal-body">
+      <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
+      Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
 
-    <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
-    ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!</p>
+      <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
+      ✅ After finishing <b>the game booths</b>, you'll have a chance <b>to redeem freebies🎉</b>!</p>
 
-    <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
-    Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+      <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
+      Congrats! You've completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+    </div>
   </div>
 </div>
 
@@ -288,6 +322,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+// Debug logging
+console.log("Script started loading");
+
 const firebaseConfig = {
   apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
   authDomain: "sustainable12.firebaseapp.com",
@@ -297,28 +334,35 @@ const firebaseConfig = {
   appId: "1:905147566179:web:52e20f5afccd05166a1056"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+try {
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  console.log("Firebase initialized successfully");
+} catch (error) {
+  console.error("Firebase initialization error:", error);
+  document.getElementById('gameList').innerHTML = 
+    '<div class="error">Error connecting to server. Please refresh the page.</div>';
+}
   
 const booths = [
   {
     name: "Waste Sorting Challenge",
     desc: [
-      "🌿 Refresh your recycling skills!", // row 1, bold
-      "Drag or pick each waste card into its correct bin", // row 2
-      "— Recyclable, Organic, or General Waste.", // row 3
-      "Sort everything correctly to earn your stamp.", // row 4
-      "✨ Let’s rethink waste the Re:Vibe way!" // row 5
+      "🌿 Refresh your recycling skills!",
+      "Drag or pick each waste card into its correct bin",
+      "— Recyclable, Organic, or General Waste.",
+      "Sort everything correctly to earn your stamp.",
+      "✨ Let's rethink waste the Re:Vibe way!"
     ],
     type: "game",
   },
   {
     name: "Sugar Shock Guess",
     desc: [
-      "🍬 How much sugar is hiding in your drink?", // bold
+      "🍬 How much sugar is hiding in your drink?",
       "Add spoonfuls of sugar until you think it matches one canned drink.", 
-      "Then, we’ll reveal the real amount 😳", 
+      "Then, we'll reveal the real amount 😳", 
       "Get close enough to earn your stamp", 
       "— and rethink your next sip!"
     ],
@@ -327,7 +371,7 @@ const booths = [
   {
     name: "Green-nopoly",
     desc: [
-      "🎲 Roll. Learn. Refresh the way you live.", // bold
+      "🎲 Roll. Learn. Refresh the way you live.",
       "1️⃣ Roll the dice to start your journey.", 
       "2️⃣ Move to the space shown.", 
       "3️⃣ Complete the task or answer the question.", 
@@ -338,7 +382,7 @@ const booths = [
   {
     name: "DIY Phone Holder / Lifestyle Deco",
     desc: [
-      "📱 Turn scraps into something cute + useful!", // bold
+      "📱 Turn scraps into something cute + useful!",
       "Pick your materials, assemble your holder, and decorate it your way.", 
       "Once your creation stands on its own, collect your stamp.", 
       "Reuse, refresh, repeat ♻️🎨"
@@ -348,18 +392,18 @@ const booths = [
   {
     name: "Trash Bowling",
     desc: [
-      "🎳 Strike out bad habits!", // bold
+      "🎳 Strike out bad habits!",
       "1️⃣ Pick the 10 non-eco-friendly bottles from the set.", 
       "2️⃣ Show them to our crew for a quick check.", 
       "3️⃣ Bowl your ball — you get 3 tries!", 
-      "Knock down the “bad habits” to earn your stamp and roll into a greener vibe 💚"
+      "Knock down the 'bad habits' to earn your stamp and roll into a greener vibe 💚"
     ],
     type: "game",
   },
   {
     name: "Create Your Own Monalisa",
     desc: [
-      "🎨 Paint, play, and re-create — Re:Vibe style!", // bold
+      "🎨 Paint, play, and re-create — Re:Vibe style!",
       "Use egg trays as your canvas and paint your pattern your way.", 
       "Once your masterpiece is done, your stamp awaits.", 
       "Upcycle your creativity 🌸♻️"
@@ -367,7 +411,9 @@ const booths = [
     type: "game",
   },
 ];
-  
+
+console.log("Booths data loaded:", booths.length, "booths");
+
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
 const modal = document.getElementById("boothModal");
@@ -382,7 +428,8 @@ const howToPlayBtn = document.getElementById("howToPlayBtn");
 const howToPlayModal = document.getElementById("howToPlayModal");
 const howToPlayClose = howToPlayModal.querySelector(".close");
 
-howToPlayBtn.onclick = () => howToPlayModal.style.display = "block";
+// How to Play modal handlers
+howToPlayBtn.onclick = () => howToPlayModal.style.display = "flex";
 howToPlayClose.onclick = () => howToPlayModal.style.display = "none";
 window.addEventListener("click", (event) => {
   if (event.target === howToPlayModal) howToPlayModal.style.display = "none";
@@ -392,14 +439,39 @@ let userData = { stamps: [] };
 let currentUser = null;
 let currentBoothIndex = null;
 
+// Initialize Firebase if not already done
+let app, auth, db;
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+}
+
 async function saveProgress() {
-  if (!currentUser) return;
-  const docRef = doc(db, "journeys", currentUser.uid);
-  await setDoc(docRef, userData);
+  if (!currentUser) {
+    console.error("No user logged in, cannot save progress");
+    return;
+  }
+  try {
+    const docRef = doc(db, "journeys", currentUser.uid);
+    await setDoc(docRef, userData);
+    console.log("Progress saved successfully");
+  } catch (error) {
+    console.error("Error saving progress:", error);
+  }
 }
 
 function renderBooths() {
   const gameList = document.getElementById("gameList");
+  
+  if (!booths || booths.length === 0) {
+    gameList.innerHTML = '<div class="error">No game booths found. Please check your connection.</div>';
+    return;
+  }
+  
+  console.log("Rendering", booths.length, "booths");
   gameList.innerHTML = "";
 
   booths.forEach((b, i) => {
@@ -412,26 +484,24 @@ function renderBooths() {
     div.onclick = () => openModal(b, i);
     gameList.appendChild(div);
   });
+  
   const progress = Math.round((userData.stamps.length / booths.length) * 100);
   progressBar.style.width = progress + "%";
   progressText.innerText = `You have collected ${userData.stamps.length} of ${booths.length} stamps`;
+  
+  console.log("Booths rendered successfully");
 }
-function openModal(booth,index){
-  const stampedImages = {
-    0: "stamp_waste.png",
-    1: "stamp_sugar.png",
-    2: "stamp_green.png",
-    3: "stamp_phone.png",
-    4: "stamp_bowling.png",
-    5: "stamp_monalisa.png",
-  };
+
+function openModal(booth, index) {
+  console.log("Opening modal for booth:", booth.name, "index:", index);
+  
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerHTML = Array.isArray(booth.desc)
     ? booth.desc.map(line => `<p>${line}</p>`).join("")
     : `<p>${booth.desc}</p>`;
 
   if (userData.stamps.includes(index)) {
-    stampMsg.innerHTML = `<img src="${stampedImages[index]}" style="width:70px; height:auto;">`;
+    stampMsg.textContent = "✅ Already Stamped";
   } else {
     stampMsg.textContent = "Tap here to stamp!";
   }
@@ -439,106 +509,106 @@ function openModal(booth,index){
   modal.style.display = "flex";
   currentBoothIndex = index;
 }
-  
-// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms)
-const targetDiameterMm = 27;
-const stableTimeMs = 300;
-const defaultPxPerMm = 96 / 25.4;
-function pxToMm(px){ return px / defaultPxPerMm; }
-let holdTimer = null;
-let touchCount = 0;
-stampStage.onclick = null;
 
-stampStage.addEventListener("touchstart", e=>{
-  e.preventDefault();
-  const touches = e.touches;
-  if(touches.length<2){
-    stampMsg.textContent="⚠️ Please Use the Right Stamp";
-    clearTimeout(holdTimer);
-    return;
-  }
-  const t1=touches[0], t2=touches[1];
-  const dx=t1.clientX-t2.clientX, dy=t1.clientY-t2.clientY;
-  const distMm=pxToMm(Math.sqrt(dx*dx+dy*dy));
-  if(distMm>targetDiameterMm){
-    stampMsg.textContent="❌ Please Try Again";
-    clearTimeout(holdTimer);
-    return;
-  }
-  stampMsg.textContent="⏳ Please hold still...";
-  holdTimer=setTimeout(()=>{
-    if(touchCount>=2) applyStamp();
-    else stampMsg.textContent="❌ Please Try Again";
-  },stableTimeMs);
-});
-stampStage.addEventListener("touchmove",e=>{touchCount=e.touches.length;});
-stampStage.addEventListener("touchend", e => {
-  touchCount = e.touches.length;
-  if(touchCount<2){
-    clearTimeout(holdTimer);
-    if(!userData.stamps.includes(currentBoothIndex))
-      stampMsg.textContent="Tap here to stamp!";
-  }
-});
+// Simplified stamping - removed complex multi-touch for now
+stampStage.onclick = function() {
+  applyStamp();
+};
 
 function applyStamp() {
   if (!currentUser) {
     stampMsg.textContent = "Please Sign In First";
+    console.error("No user logged in");
     return;
   }
+  
   if (userData.stamps.includes(currentBoothIndex)) {
     stampMsg.textContent = "✅ Already Stamped";
     return;
   }
 
-  // ✅ Add stamp and save immediately
+  // Add stamp and save immediately
   userData.stamps.push(currentBoothIndex);
   saveProgress();
-  stampSound.play();
+  
+  try {
+    stampSound.play();
+  } catch (error) {
+    console.error("Error playing sound:", error);
+  }
 
   stampMsg.textContent = "🎉 Stamped Successfully!";
 
-  // 🔥 Animate the stamping stage for fun
+  // Animate the stamping stage
   stampStage.style.animation = "pulseGlow 1.5s ease-in-out";
   setTimeout(() => {
     stampStage.style.animation = "";
   }, 1500);
 
-  // ✅ Optional: auto-close modal after short delay
+  // Update the UI
+  renderBooths();
+  
+  // Auto-close modal after short delay
   setTimeout(() => {
     modal.style.display = "none";
   }, 1200);
 }
 
-// Close modal
-closeModal.onclick = ()=> modal.style.display="none";
-window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; };
+// Close modal handlers
+closeModal.onclick = () => modal.style.display = "none";
+window.onclick = (e) => { 
+  if (e.target === modal) modal.style.display = "none"; 
+};
 
 // Firebase Auth listener
-onAuthStateChanged(auth, async user => {
+onAuthStateChanged(auth, async (user) => {
+  console.log("Auth state changed, user:", user);
+  
   if (user) {
     currentUser = user;
-    const docRef = doc(db, "journeys", user.uid);
-    const snap = await getDoc(docRef);
+    console.log("User is signed in:", user.uid);
+    
+    try {
+      const docRef = doc(db, "journeys", user.uid);
+      const snap = await getDoc(docRef);
 
-    if (snap.exists()) {  // fix here
-      userData = snap.data();
-      if (!userData.hasSeenHowToPlay) {
-        howToPlayModal.style.display = "block";
-        userData.hasSeenHowToPlay = true;
+      if (snap.exists()) {
+        userData = snap.data();
+        console.log("User data loaded:", userData);
+        
+        // Show how to play modal only if user hasn't seen it
+        if (!userData.hasSeenHowToPlay) {
+          howToPlayModal.style.display = "flex";
+          userData.hasSeenHowToPlay = true;
+          await setDoc(docRef, userData);
+        }
+      } else {
+        console.log("No existing user data, creating new document");
+        userData = { stamps: [], hasSeenHowToPlay: true };
         await setDoc(docRef, userData);
+        howToPlayModal.style.display = "flex";
       }
-    } else {
-      await setDoc(docRef, { stamps: [], hasSeenHowToPlay: true });
-      howToPlayModal.style.display = "block";
-    }
 
-    renderBooths(); // make sure to render after loading data
+      renderBooths();
+    } catch (error) {
+      console.error("Error loading user data:", error);
+      document.getElementById('gameList').innerHTML = 
+        '<div class="error">Error loading your data. Please refresh the page.</div>';
+    }
   } else {
+    console.log("No user signed in, redirecting to login");
     alert("Please Sign In First");
     window.location.href = "index.html";
   }
 });
+
+// Fallback: if Firebase fails, at least show the booths
+setTimeout(() => {
+  if (document.getElementById('gameList').innerHTML.includes('Loading')) {
+    console.log("Firebase might be taking too long, rendering booths anyway");
+    renderBooths();
+  }
+}, 3000);
 </script>
 </body>
 </html>
