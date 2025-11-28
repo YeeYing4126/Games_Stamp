@@ -8,6 +8,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Gliker&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=LazyDog&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap');
 
 body {
   font-family: 'Gaegu', sans-serif;
@@ -19,6 +21,7 @@ body {
   flex-direction: column;
   align-items: center;
   color: #B85437;
+  touch-action: manipulation; /* Improve touch responsiveness */
 }
 header {
   background-color: transparent; 
@@ -61,7 +64,7 @@ header {
 }
 .section-title {
   text-align: center;
-  font-family: 'Gliker', sans-serif;
+  font-family: 'Fredoka One', cursive; /* Updated to Fredoka One */
   font-weight: bold;
   color: #ff7aa2;
   margin-top: 25px;
@@ -96,9 +99,9 @@ header {
   box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
 .booth h4 {
-  font-family: 'LazyDog', cursive;
-  font-size: 1em;
-  font-weight: 600;
+  font-family: 'Amatic SC', cursive; /* Updated to Amatic SC */
+  font-size: 1.2em; /* Slightly larger for better readability */
+  font-weight: 700; /* Use bold weight */
   color: #B85437;
   margin-bottom: 10px;
   text-align: center;
@@ -180,6 +183,7 @@ header {
   user-select: none;
   cursor: pointer;
   position: relative;
+  touch-action: none; /* Prevent browser handling of touch gestures */
 }
 #stampMsg {
   text-align: center;
@@ -230,7 +234,7 @@ header {
   color: #46C6D7; 
   text-align: center; 
   margin-bottom: 15px; 
-  font-family: 'Gliker', sans-serif;
+  font-family: 'Fredoka One', cursive; /* Updated to match section titles */
 }
 .howToPlayModal .modal-body p { 
   color: #2A3B27; 
@@ -490,22 +494,99 @@ function openModal(booth, index) {
   if (userData.stamps.includes(index)) {
     stampMsg.textContent = "✅ Already Stamped";
   } else {
-    stampMsg.textContent = "Tap here to stamp!";
+    stampMsg.textContent = "Use two fingers to stamp!";
   }
 
   modal.style.display = "flex";
   currentBoothIndex = index;
 }
 
-// Simplified stamping - removed complex multi-touch for now
-stampStage.onclick = function() {
-  applyStamp();
-};
+// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms) - IMPROVED VERSION
+const targetDiameterMm = 27;
+const stableTimeMs = 300;
+const defaultPxPerMm = 96 / 25.4;
+
+function pxToMm(px) { 
+  return px / defaultPxPerMm; 
+}
+
+let holdTimer = null;
+let touchCount = 0;
+
+// Remove simple click handler for stamp stage
+stampStage.onclick = null;
+
+// Enhanced touch event handlers [citation:1]
+stampStage.addEventListener("touchstart", function(e) {
+  e.preventDefault(); // Prevent default browser behavior [citation:1]
+  
+  const touches = e.touches;
+  touchCount = touches.length;
+  
+  if (touchCount < 2) {
+    stampMsg.textContent = "⚠️ Use two fingers to stamp";
+    clearTimeout(holdTimer);
+    return;
+  }
+  
+  // Check distance between two touches
+  const t1 = touches[0];
+  const t2 = touches[1];
+  const dx = t1.clientX - t2.clientX;
+  const dy = t1.clientY - t2.clientY;
+  const distMm = pxToMm(Math.sqrt(dx * dx + dy * dy));
+  
+  if (distMm > targetDiameterMm) {
+    stampMsg.textContent = "❌ Bring fingers closer together";
+    clearTimeout(holdTimer);
+    return;
+  }
+  
+  stampMsg.textContent = "⏳ Hold still...";
+  
+  holdTimer = setTimeout(() => {
+    if (touchCount >= 2) {
+      applyStamp();
+    } else {
+      stampMsg.textContent = "❌ Please try again";
+    }
+  }, stableTimeMs);
+}, { passive: false });
+
+stampStage.addEventListener("touchmove", function(e) {
+  e.preventDefault(); // Prevent scrolling while touching stamp area [citation:1]
+  touchCount = e.touches.length;
+  
+  // If fingers move too far apart during hold, cancel
+  if (touchCount >= 2) {
+    const t1 = e.touches[0];
+    const t2 = e.touches[1];
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    const distMm = pxToMm(Math.sqrt(dx * dx + dy * dy));
+    
+    if (distMm > targetDiameterMm) {
+      clearTimeout(holdTimer);
+      stampMsg.textContent = "❌ Keep fingers close";
+    }
+  }
+}, { passive: false });
+
+stampStage.addEventListener("touchend", function(e) {
+  e.preventDefault();
+  touchCount = e.touches.length;
+  
+  if (touchCount < 2) {
+    clearTimeout(holdTimer);
+    if (!userData.stamps.includes(currentBoothIndex)) {
+      stampMsg.textContent = "Use two fingers to stamp!";
+    }
+  }
+}, { passive: false });
 
 function applyStamp() {
   if (!currentUser) {
     stampMsg.textContent = "Please Sign In First";
-    console.error("No user logged in");
     return;
   }
   
@@ -514,7 +595,7 @@ function applyStamp() {
     return;
   }
 
-  // Add stamp and save immediately
+  // ✅ Add stamp and save immediately
   userData.stamps.push(currentBoothIndex);
   saveProgress();
   
