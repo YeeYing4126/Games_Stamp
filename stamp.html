@@ -498,10 +498,6 @@ function applyStamp() {
 
   stampMsg.textContent = "🎉 Stamped Successfully!";
 
-  // 🔥 Instantly update booth card visually without refresh
-  updateBoothLocks();
-  renderBooths();
-
   // 🔥 Animate the stamping stage for fun
   stampStage.style.animation = "pulseGlow 1.5s ease-in-out";
   setTimeout(() => {
@@ -513,9 +509,6 @@ function applyStamp() {
     modal.style.display = "none";
   }, 1200);
 }
-
-  updateBoothLocks();
-  renderBooths();
 
 // Close modal
 closeModal.onclick = ()=> modal.style.display="none";
