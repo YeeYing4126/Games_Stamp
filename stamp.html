@@ -5,9 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Journey – Re:vibe</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
+
 body {
   font-family: 'Poppins', sans-serif;
-  background-color: #CBC8C4;
+  background: url('Background.png') no-repeat center center fixed;
+  background-size: cover;
   color: #2A3B27;
   margin: 0;
   padding: 0;
@@ -15,17 +20,18 @@ body {
   flex-direction: column;
   align-items: center;
 }
+
 header {
-  background-color: #70805D;
-  color: #FDFDFD;
-  text-align: center;
   width: 100%;
   padding: 24px 0;
-  font-size: 1.6em;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  text-align: center;
   box-shadow: 0 3px 8px rgba(0,0,0,0.15);
 }
+
+header img {
+  max-height: 60px;
+}
+
 .container {
   max-width: 480px;
   width: 100%;
@@ -35,6 +41,7 @@ header {
   box-shadow: 0 6px 18px rgba(85, 115, 141, 0.25);
   padding: 24px;
 }
+
 .progress {
   width: 100%;
   background: #96A7B6;
@@ -43,6 +50,7 @@ header {
   margin: 12px 0 25px 0;
   overflow: hidden;
 }
+
 .progress-bar {
   height: 100%;
   background: linear-gradient(270deg, #70805D, #55738D, #96A7B6);
@@ -52,6 +60,7 @@ header {
   animation: progressMove 4s linear infinite;
   border-radius: 14px;
 }
+
 .section-title {
   text-align: center;
   color: #55738D;
@@ -59,31 +68,9 @@ header {
   margin-top: 25px;
   margin-bottom: 10px;
   font-size: 1.2rem;
+  font-family: 'Fredoka One', cursive;
 }
-#sponsorList {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 14px;
-  justify-items: center;
-  padding: 10px 10px;
-}
-#sponsorList .booth {
-  width: 100%;
-  max-width: 120px;
-  aspect-ratio: 1 / 1;
-  background: linear-gradient(145deg, #F7F7F5, #EAEAEA);
-  border: 2px dashed #96A7B6; /* Cadet Gray */
-  border-radius: 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s ease-in-out;
-}
-#sponsorList .booth:hover {
-  border-color: #70805D; /* French Lilac */
-  box-shadow: 0 6px 15px rgba(112, 128, 93, 0.35);
-}
+
 #gameList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -91,6 +78,7 @@ header {
   justify-items: center;
   padding: 10px 20px;
 }
+
 .booth {
   width: 150px;
   height: 150px;
@@ -106,18 +94,29 @@ header {
   cursor: pointer;
   position: relative;
 }
+
 .booth:hover {
   transform: translateY(-4px);
   border-color: #70805D;
   box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
+
 .booth h4 {
   font-size: 1em;
   font-weight: 600;
   color: #2A3B27;
   margin-bottom: 10px;
   text-align: center;
+  font-family: 'Amatic SC', cursive;
 }
+
+.booth p {
+  font-family: 'Gaegu', cursive;
+  font-size: 0.9em;
+  text-align: center;
+  margin: 0;
+}
+
 .stamp {
   width: 46px;
   height: 46px;
@@ -131,6 +130,7 @@ header {
   color: #70805D;
   transition: all 0.3s ease;
 }
+
 .stamped {
   background: radial-gradient(circle at center, #55738D 0%, #2A3B27 80%);
   border: 2px solid #2A3B27;
@@ -138,24 +138,17 @@ header {
   transform: scale(1.1);
   animation: pulseGlow 1.5s infinite alternate;
 }
+
 @keyframes pulseGlow {
   from { box-shadow: 0 0 10px 2px rgba(85,115,141,0.3); }
   to { box-shadow: 0 0 20px 6px rgba(112,128,93,0.7); }
 }
+
 @keyframes progressMove {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
-  animation: progressMove 6s ease-in-out infinite;
 }
-@media (max-width: 500px) {
-  #sponsorList {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 10px;
-  }
-  #sponsorList .booth {
-    max-width: 100px;
-  }
-}
+
 .modal {
   display: none;
   position: fixed;
@@ -166,6 +159,7 @@ header {
   justify-content: center;
   align-items: center;
 }
+
 .modal-content {
   background: #FDFDFD;
   padding: 25px 25px 30px;
@@ -176,6 +170,7 @@ header {
   max-width: 400px;
   box-shadow: 0 6px 20px rgba(42,59,39,0.25);
 }
+
 .modal-close {
   position: absolute;
   top: 10px;
@@ -186,9 +181,11 @@ header {
   color: #55738D;
   transition: color 0.3s ease;
 }
+
 .modal-close:hover {
   color: #2A3B27;
 }
+
 #stampStage {
   width: 5cm;
   height: 5cm;
@@ -203,11 +200,12 @@ header {
   cursor: pointer;
   position: relative;
 }
+
 #stampMsg {
   text-align: center;
   font-size: 1em;
-  color: #2A3B27;
 }
+
 .how-btn {
   position: fixed;
   top: 15px;
@@ -223,14 +221,14 @@ header {
   transition: all 0.3s ease;
   z-index: 2000;
 }
-.how-btn:hover {
-  background: #FFE59A;
-}
+
+.how-btn:hover { background: #FFE59A; }
+
 .howToPlayModal {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* centers horizontally + vertically */
+  transform: translate(-50%, -50%);
   z-index: 1000;
   background: white;
   border-radius: 16px;
@@ -241,82 +239,37 @@ header {
   text-align: left;
   transition: all 0.3s ease;
 }
-.howToPlayModal.hidden {
-  display: none;
-}
-#howToPlayModal .modal-content {
-  background: #FDFDFD;
-  text-align: left;
-  padding: 30px;
-  border-radius: 20px;
-  width: 90%;
-  max-width: 480px;
-  box-shadow: 0 8px 25px rgba(42,59,39,0.35);
-  position: relative;
-  transform: translateY(0);
-}
-#howToPlayModal h2 {
-  color: #55738D;
-  text-align: center;
-  margin-bottom: 15px;
-}
-#howToPlayModal .modal-body p {
-  color: #2A3B27;
-  margin: 10px 0;
-  line-height: 1.6;
-  font-size: 0.95rem;
-  text-align: justify;
-}
-#howToPlayModal .close {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  font-size: 26px;
-  font-weight: bold;
-  color: #70805D;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-#howToPlayModal .close:hover {
-  color: #2A3B27;
-}
+.howToPlayModal.hidden { display: none; }
 </style>
 </head>
 <body>
-  
-<header>My Journey</header>
+
+<header>
+  <img src="ReVibe Logo_Transparent Background.png" alt="ReVibe Logo">
+</header>
 
 <div class="container" id="mainApp">
   <div id="progressText"></div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-  
-  <h3 class="section-title">🎁 Sponsors Booths</h3>
-  <div id="sponsorList"></div>
 
   <h3 class="section-title">🎮 Game Booths</h3>
   <div id="gameList"></div>
 </div>
 
-<!-- 📘 How to Play Button -->
 <button id="howToPlayBtn" class="how-btn">📘 How to Play</button>
 
-<!-- 📘 Instruction Modal -->
 <div id="howToPlayModal" class="howToPlayModal hidden">
   <span class="close">&times;</span>
   <h2>♻️ How to Play – Re:Vibe Journey</h2>
   <div class="modal-body">
     <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
-    Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
+    Explore all game booths and tap the booth card here to <b>collect your stamp</b>.</p>
 
-    <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
-    ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!</p>
-
-    <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
-    Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+    <p><strong>Step 2 — Complete Your Journey 🌱</strong><br>
+    Congrats! You’ve collected all stamps — proving that sustainability can be fun and rewarding 💚</p>
   </div>
 </div>
 
-<!-- Booth Modal -->
 <div class="modal" id="boothModal">
   <div class="modal-content">
     <span class="modal-close" id="closeModal">&times;</span>
@@ -346,19 +299,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-  
+
 const booths = [
   { name: "Waste Sorting Challenge", desc: "Sort waste cards into Recyclable, Organic, or General bins.", type: "game" },
   { name: "Sugar Shock Guess", desc: "Guess sugar in a soft drink then reveal actual amount.", type: "game" },
   { name: "Eco Monopoly", desc: "Roll dice and answer questions to move forward.", type: "game" },
-  { name: "Sponsors 1", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true },
   { name: "DIY Phone Holder", desc: "Reuse materials to craft an eco item.", type: "game" },
   { name: "Trash Bowling", desc: "Knock down non-recyclable trash bottles.", type: "game" },
-  { name: "Sponsors 2", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true },
-  { name: "Create Your Own Monalisa", desc: "Use egg trays to paint art.", type: "game" },
-  { name: "Sponsors 3", desc: "🎁 Redeem a small gift here!", type: "sponsor", locked: true }
+  { name: "Create Your Own Monalisa", desc: "Use egg trays to paint art.", type: "game" }
 ];
-  
+
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
 const modal = document.getElementById("boothModal");
@@ -389,53 +339,17 @@ async function saveProgress() {
   await setDoc(docRef, userData);
 }
 
-function updateBoothLocks() {
-  const gameCount = userData.stamps.filter(i => booths[i]?.type === "game").length;
-  const sponsorIndexes = booths.map((b, i) => b.type === "sponsor" ? i : null).filter(i => i !== null);
-  const stampedSponsors = sponsorIndexes.filter(i => userData.stamps.includes(i));
-
-  // Lock all first
-  sponsorIndexes.forEach(i => (booths[i].locked = true));
-
-  if (gameCount >= 3 && stampedSponsors.length === 0) {
-    // Unlock all sponsors when 3 games done
-    sponsorIndexes.forEach(i => (booths[i].locked = false));
-  } 
-  else if (stampedSponsors.length === 1 && gameCount < 5) {
-    // After first sponsor stamped but before 5 games done → lock others
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = true));
-  }
-  else if (gameCount >= 5 && stampedSponsors.length === 1) {
-    // Unlock remaining 2 sponsors
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
-  }
-  else if (stampedSponsors.length === 2 && gameCount < 6) {
-    // Lock last sponsor again until 6 games done
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = true));
-  }
-  else if (gameCount >= 6 && stampedSponsors.length === 2) {
-    // Unlock final sponsor
-    sponsorIndexes.filter(i => !userData.stamps.includes(i)).forEach(i => (booths[i].locked = false));
-  }
-}
-
-
 function renderBooths() {
-  const sponsorList = document.getElementById("sponsorList");
   const gameList = document.getElementById("gameList");
-  sponsorList.innerHTML = "";
   gameList.innerHTML = "";
   booths.forEach((b,i)=>{
     const stamped = userData.stamps.includes(i);
     const div = document.createElement("div");
     div.className = "booth";
-    const stampSymbol = b.type === "sponsor" && stamped ? "🎁" : stamped ? "✓" : "";
-    div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped ? "stamped" : ""}">${stampSymbol}</div>`;
-    div.style.opacity = b.locked ? "0.4" : "1";
-    div.style.pointerEvents = b.locked ? "none" : "auto";
+    const stampSymbol = stamped ? "✓" : "";
+    div.innerHTML = `<h4>${b.name}</h4><p>${b.desc}</p><div class="stamp ${stamped ? "stamped" : ""}">${stampSymbol}</div>`;
     div.onclick = ()=>openModal(b,i);
-    if (b.type === "sponsor") sponsorList.appendChild(div);
-    else gameList.appendChild(div);
+    gameList.appendChild(div);
   });
   const progress = Math.round((userData.stamps.length / booths.length) * 100);
   progressBar.style.width = progress + "%";
@@ -450,107 +364,34 @@ function openModal(booth,index){
   currentBoothIndex = index;
 }
 
-// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms)
-const targetDiameterMm = 27;
-const stableTimeMs = 300;
-const defaultPxPerMm = 96 / 25.4;
-function pxToMm(px){ return px / defaultPxPerMm; }
-let holdTimer = null;
-let touchCount = 0;
-stampStage.onclick = null;
-
-stampStage.addEventListener("touchstart", e=>{
-  e.preventDefault();
-  const touches = e.touches;
-  if(touches.length<2){
-    stampMsg.textContent="⚠️ Please Use the Right Stamp";
-    clearTimeout(holdTimer);
-    return;
-  }
-  const t1=touches[0], t2=touches[1];
-  const dx=t1.clientX-t2.clientX, dy=t1.clientY-t2.clientY;
-  const distMm=pxToMm(Math.sqrt(dx*dx+dy*dy));
-  if(distMm>targetDiameterMm){
-    stampMsg.textContent="❌ Please Try Again";
-    clearTimeout(holdTimer);
-    return;
-  }
-  stampMsg.textContent="⏳ Please hold still...";
-  holdTimer=setTimeout(()=>{
-    if(touchCount>=2) applyStamp();
-    else stampMsg.textContent="❌ Please Try Again";
-  },stableTimeMs);
-});
-stampStage.addEventListener("touchmove",e=>{touchCount=e.touches.length;});
-stampStage.addEventListener("touchend",e=>{
-  touchCount=e.touches.length;
-  if(touchCount<2){
-    clearTimeout(holdTimer);
-    if(!userData.stamps.includes(currentBoothIndex))
-      stampMsg.textContent="Tap here to stamp!";
-  }
-});
+stampStage.onclick = applyStamp;
 
 function applyStamp() {
-  if (!currentUser) {
-    stampMsg.textContent = "Please Sign In First";
-    return;
-  }
-  if (userData.stamps.includes(currentBoothIndex)) {
-    stampMsg.textContent = "✅ Already Stamped";
-    return;
-  }
+  if (!currentUser) { stampMsg.textContent = "Please Sign In First"; return; }
+  if (userData.stamps.includes(currentBoothIndex)) { stampMsg.textContent = "✅ Already Stamped"; return; }
 
-  // ✅ Add stamp and save immediately
   userData.stamps.push(currentBoothIndex);
   saveProgress();
   stampSound.play();
 
   stampMsg.textContent = "🎉 Stamped Successfully!";
-
-  // 🔥 Instantly update booth card visually without refresh
-  updateBoothLocks();
   renderBooths();
 
-  // 🔥 Animate the stamping stage for fun
-  stampStage.style.animation = "pulseGlow 1.5s ease-in-out";
-  setTimeout(() => {
-    stampStage.style.animation = "";
-  }, 1500);
-
-  // ✅ Optional: auto-close modal after short delay
-  setTimeout(() => {
-    modal.style.display = "none";
-  }, 1200);
+  setTimeout(() => { modal.style.display = "none"; }, 1200);
 }
 
-  updateBoothLocks();
-  renderBooths();
-
-// Close modal
 closeModal.onclick = ()=> modal.style.display="none";
 window.onclick = e=>{ if(e.target===modal) modal.style.display="none"; };
 
-// Firebase Auth listener
 onAuthStateChanged(auth, async user=>{
   if(user){
     currentUser=user;
     const docRef=doc(db,"journeys",user.uid);
     const docSnap=await getDoc(docRef);
     
-    if (docSnap.exists()) {
-      userData = docSnap.data();
-      if (!userData.hasSeenHowToPlay) {
-        howToPlayModal.style.display = "block";
-        userData.hasSeenHowToPlay = true;
-        await setDoc(docRef, userData);
-      }
-    } else {
-      await setDoc(docRef, { stamps: [], hasSeenHowToPlay: true });
-      howToPlayModal.style.display = "block";
-    }
+    if (docSnap.exists()) userData = docSnap.data();
+    else await setDoc(docRef, { stamps: [] });
 
-    updateBoothLocks();
     renderBooths();
   } else {
     alert("Please Sign In First");
