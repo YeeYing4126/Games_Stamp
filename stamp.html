@@ -288,11 +288,14 @@ header {
     <span class="close">&times;</span>
     <h2>♻️ How to Play – Re:Vibe Journey</h2>
     <div class="modal-body">
-      <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
-      Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
+    <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
+    Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
 
-      <p><strong>Step 2 — Refresh the Way You Live 🌱</strong><br>
-      Congrats! You've completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+    <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
+    ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!</p>
+
+    <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
+    Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
     </div>
   </div>
 </div>
@@ -338,7 +341,7 @@ try {
   
 const booths = [
   {
-    name: "Waste Sorting Challenge",
+    name: <b>"Waste Sorting Challenge"</b>,
     desc: [
       "🌿 Refresh your recycling skills!",
       "Drag or pick each waste card into its correct bin",
@@ -349,7 +352,7 @@ const booths = [
     type: "game",
   },
   {
-    name: "Sugar Shock Guess",
+    name: <b>"Sugar Shock Guess"</b>,
     desc: [
       "🍬 How much sugar is hiding in your drink?",
       "Add spoonfuls of sugar until you think it matches one canned drink.", 
@@ -360,7 +363,7 @@ const booths = [
     type: "game",
   },
   {
-    name: "Green-nopoly",
+    name: <b>"Green-nopoly"</b>,
     desc: [
       "🎲 Roll. Learn. Refresh the way you live.",
       "1️⃣ Roll the dice to start your journey.", 
@@ -371,7 +374,7 @@ const booths = [
     type: "game",
   },
   {
-    name: "DIY Phone Holder / Lifestyle Deco",
+    name: <b>"DIY Phone Holder / Lifestyle Deco"</b>,
     desc: [
       "📱 Turn scraps into something cute + useful!",
       "Pick your materials, assemble your holder, and decorate it your way.", 
@@ -381,7 +384,7 @@ const booths = [
     type: "game",
   },
   {
-    name: "Trash Bowling",
+    name: <b>"Trash Bowling"</b>,
     desc: [
       "🎳 Strike out bad habits!",
       "1️⃣ Pick the 10 non-eco-friendly bottles from the set.", 
@@ -392,7 +395,7 @@ const booths = [
     type: "game",
   },
   {
-    name: "Create Your Own Monalisa",
+    name: <b>"Create Your Own Monalisa"</b>,
     desc: [
       "🎨 Paint, play, and re-create — Re:Vibe style!",
       "Use egg trays as your canvas and paint your pattern your way.", 
@@ -524,7 +527,7 @@ stampStage.addEventListener("touchstart", function(e) {
   touchCount = touches.length;
   
   if (touchCount < 2) {
-    stampMsg.textContent = "⚠️ Use two fingers to stamp";
+    stampMsg.textContent = "⚠️ Use the right STAMP!";
     clearTimeout(holdTimer);
     return;
   }
@@ -537,7 +540,7 @@ stampStage.addEventListener("touchstart", function(e) {
   const distMm = pxToMm(Math.sqrt(dx * dx + dy * dy));
   
   if (distMm > targetDiameterMm) {
-    stampMsg.textContent = "❌ Bring fingers closer together";
+    stampMsg.textContent = "❌ Please try again";
     clearTimeout(holdTimer);
     return;
   }
@@ -567,7 +570,7 @@ stampStage.addEventListener("touchmove", function(e) {
     
     if (distMm > targetDiameterMm) {
       clearTimeout(holdTimer);
-      stampMsg.textContent = "❌ Keep fingers close";
+      stampMsg.textContent = "❌ Please try again";
     }
   }
 }, { passive: false });
@@ -579,7 +582,7 @@ stampStage.addEventListener("touchend", function(e) {
   if (touchCount < 2) {
     clearTimeout(holdTimer);
     if (!userData.stamps.includes(currentBoothIndex)) {
-      stampMsg.textContent = "Use two fingers to stamp!";
+      stampMsg.textContent = "⚠️ Use the right STAMP!";
     }
   }
 }, { passive: false });
