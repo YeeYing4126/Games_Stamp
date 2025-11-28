@@ -398,12 +398,14 @@ onAuthStateChanged(auth, async user => {
     currentUser = user;
     const docRef = doc(db, "journeys", user.uid);
     const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      userData = docSnap.data();
-    } else {
-      await setDoc(docRef, { stamps: [] });
-    }
+
+  if (docSnap.exists()) {
+    userData = docSnap.data();
+    if (!userData.stamps) userData.stamps = [];
+  } else {
+    userData = { stamps: [] };
+    await setDoc(docRef, userData);
+  }
     renderBooths();
   } else {
     alert("Please Sign In First");
