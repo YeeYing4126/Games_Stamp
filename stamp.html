@@ -252,19 +252,6 @@ header {
 .howToPlayModal .close:hover { 
   color: #2A3B27; 
 }
-.loading {
-  text-align: center;
-  padding: 20px;
-  color: #B85437;
-}
-.error {
-  text-align: center;
-  padding: 20px;
-  color: #ff0000;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
-  margin: 20px;
-}
 </style>
 </head>
 <body>
@@ -277,9 +264,9 @@ header {
   <div id="progressText">Loading your journey...</div>
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 
-  <h3 class="section-title">Game Booths</h3>
+  <h3 class="section-title">🎮 Game Booths</h3>
   <div id="gameList">
-    <div class="loading">Loading game booths...</div>
+    <div style="text-align: center; color: #B85437;">Loading game booths...</div>
   </div>
 </div>
 
@@ -313,7 +300,7 @@ header {
     <div id="stampStage">
       <span id="stampMsg">Tap here to stamp!</span>
     </div>
-    <audio id="stampSound" src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/Revibe.mp3" preload="auto"></audio>
+    <audio id="stampSound" src="Revibe.mp3" preload="auto"></audio>
   </div>
 </div>
 
@@ -321,9 +308,6 @@ header {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
-// Debug logging
-console.log("Script started loading");
 
 const firebaseConfig = {
   apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
@@ -334,16 +318,9 @@ const firebaseConfig = {
   appId: "1:905147566179:web:52e20f5afccd05166a1056"
 };
 
-try {
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  console.log("Firebase initialized successfully");
-} catch (error) {
-  console.error("Firebase initialization error:", error);
-  document.getElementById('gameList').innerHTML = 
-    '<div class="error">Error connecting to server. Please refresh the page.</div>';
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
   
 const booths = [
   {
@@ -409,11 +386,9 @@ const booths = [
       "Upcycle your creativity 🌸♻️"
     ],
     type: "game",
-  },
+  }
 ];
-
-console.log("Booths data loaded:", booths.length, "booths");
-
+  
 const progressBar = document.getElementById("progressBar");
 const progressText = document.getElementById("progressText");
 const modal = document.getElementById("boothModal");
@@ -428,36 +403,25 @@ const howToPlayBtn = document.getElementById("howToPlayBtn");
 const howToPlayModal = document.getElementById("howToPlayModal");
 const howToPlayClose = howToPlayModal.querySelector(".close");
 
-// How to Play modal handlers
 howToPlayBtn.onclick = () => howToPlayModal.style.display = "flex";
 howToPlayClose.onclick = () => howToPlayModal.style.display = "none";
 window.addEventListener("click", (event) => {
   if (event.target === howToPlayModal) howToPlayModal.style.display = "none";
 });
 
-let userData = { stamps: [] };
+let userData = { stamps: [], hasSeenHowToPlay: false };
 let currentUser = null;
 let currentBoothIndex = null;
 
-// Initialize Firebase if not already done
-let app, auth, db;
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-} catch (error) {
-  console.error("Firebase initialization failed:", error);
-}
-
 async function saveProgress() {
   if (!currentUser) {
-    console.error("No user logged in, cannot save progress");
+    console.error("No user logged in");
     return;
   }
   try {
     const docRef = doc(db, "journeys", currentUser.uid);
     await setDoc(docRef, userData);
-    console.log("Progress saved successfully");
+    console.log("Progress saved:", userData.stamps);
   } catch (error) {
     console.error("Error saving progress:", error);
   }
@@ -465,13 +429,6 @@ async function saveProgress() {
 
 function renderBooths() {
   const gameList = document.getElementById("gameList");
-  
-  if (!booths || booths.length === 0) {
-    gameList.innerHTML = '<div class="error">No game booths found. Please check your connection.</div>';
-    return;
-  }
-  
-  console.log("Rendering", booths.length, "booths");
   gameList.innerHTML = "";
 
   booths.forEach((b, i) => {
@@ -488,13 +445,9 @@ function renderBooths() {
   const progress = Math.round((userData.stamps.length / booths.length) * 100);
   progressBar.style.width = progress + "%";
   progressText.innerText = `You have collected ${userData.stamps.length} of ${booths.length} stamps`;
-  
-  console.log("Booths rendered successfully");
 }
 
 function openModal(booth, index) {
-  console.log("Opening modal for booth:", booth.name, "index:", index);
-  
   modalBoothName.innerText = booth.name;
   modalBoothDesc.innerHTML = Array.isArray(booth.desc)
     ? booth.desc.map(line => `<p>${line}</p>`).join("")
@@ -510,7 +463,7 @@ function openModal(booth, index) {
   currentBoothIndex = index;
 }
 
-// Simplified stamping - removed complex multi-touch for now
+// Simplified stamping - single tap
 stampStage.onclick = function() {
   applyStamp();
 };
@@ -518,7 +471,6 @@ stampStage.onclick = function() {
 function applyStamp() {
   if (!currentUser) {
     stampMsg.textContent = "Please Sign In First";
-    console.error("No user logged in");
     return;
   }
   
@@ -534,10 +486,13 @@ function applyStamp() {
   try {
     stampSound.play();
   } catch (error) {
-    console.error("Error playing sound:", error);
+    console.log("Sound play error:", error);
   }
 
   stampMsg.textContent = "🎉 Stamped Successfully!";
+
+  // Update UI immediately
+  renderBooths();
 
   // Animate the stamping stage
   stampStage.style.animation = "pulseGlow 1.5s ease-in-out";
@@ -545,28 +500,25 @@ function applyStamp() {
     stampStage.style.animation = "";
   }, 1500);
 
-  // Update the UI
-  renderBooths();
-  
   // Auto-close modal after short delay
   setTimeout(() => {
     modal.style.display = "none";
   }, 1200);
 }
 
-// Close modal handlers
+// Close modal
 closeModal.onclick = () => modal.style.display = "none";
 window.onclick = (e) => { 
   if (e.target === modal) modal.style.display = "none"; 
 };
 
-// Firebase Auth listener
+// Firebase Auth listener - FIXED VERSION
 onAuthStateChanged(auth, async (user) => {
   console.log("Auth state changed, user:", user);
   
   if (user) {
     currentUser = user;
-    console.log("User is signed in:", user.uid);
+    console.log("User signed in:", user.uid);
     
     try {
       const docRef = doc(db, "journeys", user.uid);
@@ -574,7 +526,7 @@ onAuthStateChanged(auth, async (user) => {
 
       if (snap.exists()) {
         userData = snap.data();
-        console.log("User data loaded:", userData);
+        console.log("Loaded user data:", userData);
         
         // Show how to play modal only if user hasn't seen it
         if (!userData.hasSeenHowToPlay) {
@@ -583,7 +535,7 @@ onAuthStateChanged(auth, async (user) => {
           await setDoc(docRef, userData);
         }
       } else {
-        console.log("No existing user data, creating new document");
+        console.log("No existing data, creating new document");
         userData = { stamps: [], hasSeenHowToPlay: true };
         await setDoc(docRef, userData);
         howToPlayModal.style.display = "flex";
@@ -592,8 +544,6 @@ onAuthStateChanged(auth, async (user) => {
       renderBooths();
     } catch (error) {
       console.error("Error loading user data:", error);
-      document.getElementById('gameList').innerHTML = 
-        '<div class="error">Error loading your data. Please refresh the page.</div>';
     }
   } else {
     console.log("No user signed in, redirecting to login");
@@ -601,14 +551,6 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
   }
 });
-
-// Fallback: if Firebase fails, at least show the booths
-setTimeout(() => {
-  if (document.getElementById('gameList').innerHTML.includes('Loading')) {
-    console.log("Firebase might be taking too long, rendering booths anyway");
-    renderBooths();
-  }
-}, 3000);
 </script>
 </body>
 </html>
