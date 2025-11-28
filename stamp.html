@@ -21,7 +21,7 @@ body {
   flex-direction: column;
   align-items: center;
   color: #B85437;
-  touch-action: manipulation; /* Improve touch responsiveness */
+  touch-action: manipulation;
 }
 header {
   background-color: transparent; 
@@ -64,7 +64,7 @@ header {
 }
 .section-title {
   text-align: center;
-  font-family: 'Fredoka One', cursive; /* Updated to Fredoka One */
+  font-family: 'Fredoka One', cursive;
   font-weight: bold;
   color: #ff7aa2;
   margin-top: 25px;
@@ -99,9 +99,9 @@ header {
   box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
 .booth h4 {
-  font-family: 'Amatic SC', cursive; /* Updated to Amatic SC */
-  font-size: 1.2em; /* Slightly larger for better readability */
-  font-weight: 700; /* Use bold weight */
+  font-family: 'Amatic SC', cursive;
+  font-size: 1.2em;
+  font-weight: 700;
   color: #B85437;
   margin-bottom: 10px;
   text-align: center;
@@ -183,7 +183,7 @@ header {
   user-select: none;
   cursor: pointer;
   position: relative;
-  touch-action: none; /* Prevent browser handling of touch gestures */
+  touch-action: none;
 }
 #stampMsg {
   text-align: center;
@@ -234,7 +234,7 @@ header {
   color: #46C6D7; 
   text-align: center; 
   margin-bottom: 15px; 
-  font-family: 'Fredoka One', cursive; /* Updated to match section titles */
+  font-family: 'Fredoka One', cursive;
 }
 .howToPlayModal .modal-body p { 
   color: #2A3B27; 
@@ -288,14 +288,11 @@ header {
     <span class="close">&times;</span>
     <h2>♻️ How to Play – Re:Vibe Journey</h2>
     <div class="modal-body">
-    <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
-    Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
+      <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
+      Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
 
-    <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
-    ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!</p>
-
-    <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
-    Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+      <p><strong>Step 2 — Refresh the Way You Live 🌱</strong><br>
+      Congrats! You've completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
     </div>
   </div>
 </div>
@@ -330,13 +327,16 @@ const firebaseConfig = {
   appId: "1:905147566179:web:52e20f5afccd05166a1056"
 };
 
+// Initialize Firebase
+let app, auth, db;
 try {
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
   console.log("Firebase initialized successfully");
 } catch (error) {
   console.error("Firebase initialization error:", error);
+  document.getElementById('gameList').innerHTML = '<div class="loading">Firebase error. Please refresh.</div>';
 }
   
 const booths = [
@@ -395,7 +395,7 @@ const booths = [
     type: "game",
   },
   {
-    name: <b>"Create Your Own Monalisa"</b>,
+    name: "Create Your Own Monalisa",
     desc: [
       "🎨 Paint, play, and re-create — Re:Vibe style!",
       "Use egg trays as your canvas and paint your pattern your way.", 
@@ -432,16 +432,6 @@ window.addEventListener("click", (event) => {
 let userData = { stamps: [] };
 let currentUser = null;
 let currentBoothIndex = null;
-
-// Initialize Firebase if not already done
-let app, auth, db;
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-} catch (error) {
-  console.error("Firebase initialization failed:", error);
-}
 
 async function saveProgress() {
   if (!currentUser) {
@@ -504,7 +494,7 @@ function openModal(booth, index) {
   currentBoothIndex = index;
 }
 
-// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms) - IMPROVED VERSION
+// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms)
 const targetDiameterMm = 27;
 const stableTimeMs = 300;
 const defaultPxPerMm = 96 / 25.4;
@@ -516,12 +506,9 @@ function pxToMm(px) {
 let holdTimer = null;
 let touchCount = 0;
 
-// Remove simple click handler for stamp stage
-stampStage.onclick = null;
-
-// Enhanced touch event handlers [citation:1]
+// Enhanced touch event handlers
 stampStage.addEventListener("touchstart", function(e) {
-  e.preventDefault(); // Prevent default browser behavior [citation:1]
+  e.preventDefault();
   
   const touches = e.touches;
   touchCount = touches.length;
@@ -557,7 +544,7 @@ stampStage.addEventListener("touchstart", function(e) {
 }, { passive: false });
 
 stampStage.addEventListener("touchmove", function(e) {
-  e.preventDefault(); // Prevent scrolling while touching stamp area [citation:1]
+  e.preventDefault();
   touchCount = e.touches.length;
   
   // If fingers move too far apart during hold, cancel
@@ -663,6 +650,7 @@ onAuthStateChanged(auth, async (user) => {
       renderBooths();
     } catch (error) {
       console.error("Error loading user data:", error);
+      document.getElementById('gameList').innerHTML = '<div class="loading">Error loading your data.</div>';
     }
   } else {
     console.log("No user signed in, redirecting to login");
