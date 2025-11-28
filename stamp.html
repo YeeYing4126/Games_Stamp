@@ -68,13 +68,6 @@ header {
   margin-bottom: 10px;
   font-size: 1.2rem;
 }
-#sponsorList {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 14px;
-  justify-items: center;
-  padding: 10px 10px;
-}
 #gameList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -403,27 +396,23 @@ async function saveProgress() {
 }
 
 function renderBooths() {
-  const sponsorList = document.getElementById("sponsorList");
   const gameList = document.getElementById("gameList");
-  sponsorList.innerHTML = "";
   gameList.innerHTML = "";
-  booths.forEach((b,i)=>{
+
+  booths.forEach((b, i) => {
     const stamped = userData.stamps.includes(i);
     const div = document.createElement("div");
     div.className = "booth";
-    const stampSymbol = b.type === "sponsor" && stamped ? "🎁" : stamped ? "✓" : "";
+    const stampSymbol = stamped ? "✓" : "";
     div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped ? "stamped" : ""}">${stampSymbol}</div>`;
-    div.style.opacity = b.locked ? "0.4" : "1";
-    div.style.pointerEvents = b.locked ? "none" : "auto";
-    div.onclick = ()=>openModal(b,i);
-    if (b.type === "sponsor") sponsorList.appendChild(div);
-    else gameList.appendChild(div);
+    div.style.pointerEvents = "auto";
+    div.onclick = () => openModal(b, i);
+    gameList.appendChild(div);
   });
   const progress = Math.round((userData.stamps.length / booths.length) * 100);
   progressBar.style.width = progress + "%";
   progressText.innerText = `You have collected ${userData.stamps.length} of ${booths.length} stamps`;
 }
-
 function openModal(booth,index){
   const stampedImages = {
     0: "stamp_waste.png",
@@ -433,7 +422,6 @@ function openModal(booth,index){
     5: "stamp_bowling.png",
     7: "stamp_monalisa.png",
   };
-
   modalBoothName.innerText = booth.name;
    modalBoothDesc.innerHTML = Array.isArray(booth.desc)
     ? booth.desc.map(line => `<p>${line}</p>`).join("")
@@ -549,8 +537,6 @@ onAuthStateChanged(auth, async user => {
       howToPlayModal.style.display = "block";
     }
 
-    updateBoothLocks();
-    renderBooths();
   } else {
     alert("Please Sign In First");
     window.location.href = "index.html";
