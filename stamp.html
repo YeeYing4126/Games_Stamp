@@ -19,7 +19,7 @@ body {
   flex-direction: column;
   align-items: center;
   color: #B85437;
-  touch-action: manipulation; /* Improve touch responsiveness */
+  touch-action: manipulation;
 }
 header {
   background-color: transparent; 
@@ -62,7 +62,7 @@ header {
 }
 .section-title {
   text-align: center;
-  font-family: 'Fredoka One', cursive; /* Updated to Fredoka One */
+  font-family: 'Fredoka One', cursive;
   font-weight: bold;
   color: #ff7aa2;
   margin-top: 25px;
@@ -97,13 +97,14 @@ header {
   box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
 .booth h4 {
-  font-family: 'Amatic SC', cursive; /* Updated to Amatic SC */
-  font-size: 1.4em; /* Slightly larger for better readability */
-  font-weight: 700; /* Use bold weight */
+  font-family: 'Amatic SC', cursive;
+  font-size: 1.4em;
+  font-weight: 700;
   color: #B85437;
   margin-bottom: 10px;
   text-align: center;
-   text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  line-height: 1.2;
 }
 .stamp {
   width: 46px;
@@ -182,7 +183,7 @@ header {
   user-select: none;
   cursor: pointer;
   position: relative;
-  touch-action: none; /* Prevent browser handling of touch gestures */
+  touch-action: none;
 }
 #stampMsg {
   text-align: center;
@@ -233,7 +234,7 @@ header {
   color: #46C6D7; 
   text-align: center; 
   margin-bottom: 15px; 
-  font-family: 'Fredoka One', cursive; /* Updated to match section titles */
+  font-family: 'Fredoka One', cursive; 
 }
 .howToPlayModal .modal-body p { 
   color: #2A3B27; 
@@ -259,6 +260,11 @@ header {
   text-align: center;
   padding: 20px;
   color: #B85437;
+}
+.stamp-image {
+  width: 120px;
+  height: auto;
+  border-radius: 10px;
 }
 </style>
 </head>
@@ -291,10 +297,10 @@ header {
     Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
 
     <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
-    ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!</p>
+    ✅ After finishing <b>the game booths</b>, you'll have a chance <b>to redeem freebies🎉</b>!</p>
 
     <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
-    Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+    Congrats! You've completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
     </div>
   </div>
 </div>
@@ -306,7 +312,7 @@ header {
     <h3 id="modalBoothName"></h3>
     <p id="modalBoothDesc"></p>
     <div id="stampStage">
-      <span id="stampMsg">Tap here to stamp!</span>
+      <span id="stampMsg">Stamp here!</span>
     </div>
     <audio id="stampSound" src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/Revibe.mp3" preload="auto"></audio>
   </div>
@@ -351,6 +357,7 @@ const booths = [
       "✨ Let's rethink waste the Re:Vibe way!"
     ],
     type: "game",
+    stampImage: "stamp_waste.png"
   },
   {
     name: "Sugar Shock Guess",
@@ -362,6 +369,7 @@ const booths = [
       "— and rethink your next sip!"
     ],
     type: "game",
+    stampImage: "stamp_sugar.png"
   },
   {
     name: "Green-nopoly",
@@ -373,6 +381,7 @@ const booths = [
       "Get it right → roll again and keep vibing! Finish one full round to earn your stamp 🌱"
     ],
     type: "game",
+    stampImage: "stamp_green.png"
   },
   {
     name: "DIY Phone Holder / Lifestyle Deco",
@@ -383,6 +392,7 @@ const booths = [
       "Reuse, refresh, repeat ♻️🎨"
     ],
     type: "game",
+    stampImage: "stamp_phone.png"
   },
   {
     name: "Trash Bowling",
@@ -394,6 +404,7 @@ const booths = [
       "Knock down the 'bad habits' to earn your stamp and roll into a greener vibe 💚"
     ],
     type: "game",
+    stampImage: "stamp_bowling.png"
   },
   {
     name: "Create Your Own Monalisa",
@@ -404,6 +415,7 @@ const booths = [
       "Upcycle your creativity 🌸♻️"
     ],
     type: "game",
+    stampImage: "stamp_monalisa.png"
   },
 ];
 
@@ -496,16 +508,17 @@ function openModal(booth, index) {
     : `<p>${booth.desc}</p>`;
 
   if (userData.stamps.includes(index)) {
-    stampMsg.textContent = "✅ Already Stamped";
+    // Show the specific stamp image for this booth
+    stampMsg.innerHTML = `<img src="${booth.stampImage}" class="stamp-image" alt="Stamp">`;
   } else {
-    stampMsg.textContent = "⚠️ Use the right stamp!";
+    stampMsg.textContent = "Stamp here!";
   }
 
   modal.style.display = "flex";
   currentBoothIndex = index;
 }
 
-// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms) - IMPROVED VERSION
+// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms)
 const targetDiameterMm = 27;
 const stableTimeMs = 300;
 const defaultPxPerMm = 96 / 25.4;
@@ -520,9 +533,9 @@ let touchCount = 0;
 // Remove simple click handler for stamp stage
 stampStage.onclick = null;
 
-// Enhanced touch event handlers [citation:1]
+// Enhanced touch event handlers
 stampStage.addEventListener("touchstart", function(e) {
-  e.preventDefault(); // Prevent default browser behavior [citation:1]
+  e.preventDefault();
   
   const touches = e.touches;
   touchCount = touches.length;
@@ -558,7 +571,7 @@ stampStage.addEventListener("touchstart", function(e) {
 }, { passive: false });
 
 stampStage.addEventListener("touchmove", function(e) {
-  e.preventDefault(); // Prevent scrolling while touching stamp area [citation:1]
+  e.preventDefault();
   touchCount = e.touches.length;
   
   // If fingers move too far apart during hold, cancel
@@ -595,7 +608,8 @@ function applyStamp() {
   }
   
   if (userData.stamps.includes(currentBoothIndex)) {
-    stampMsg.textContent = "✅ Already Stamped";
+    // Show the specific stamp image for this booth
+    stampMsg.innerHTML = `<img src="${booths[currentBoothIndex].stampImage}" class="stamp-image" alt="Stamp">`;
     return;
   }
 
@@ -609,7 +623,8 @@ function applyStamp() {
     console.error("Error playing sound:", error);
   }
 
-  stampMsg.textContent = "🎉 Stamped Successfully!";
+  // Show the specific stamp image for this booth instead of text
+  stampMsg.innerHTML = `<img src="${booths[currentBoothIndex].stampImage}" class="stamp-image" alt="Stamp">`;
 
   // Animate the stamping stage
   stampStage.style.animation = "pulseGlow 1.5s ease-in-out";
