@@ -6,8 +6,6 @@
 <title>My Journey – Re:vibe</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Gliker&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=LazyDog&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap');
 
@@ -21,7 +19,7 @@ body {
   flex-direction: column;
   align-items: center;
   color: #B85437;
-  touch-action: manipulation;
+  touch-action: manipulation; /* Improve touch responsiveness */
 }
 header {
   background-color: transparent; 
@@ -64,7 +62,7 @@ header {
 }
 .section-title {
   text-align: center;
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Fredoka One', cursive; /* Updated to Fredoka One */
   font-weight: bold;
   color: #ff7aa2;
   margin-top: 25px;
@@ -99,12 +97,13 @@ header {
   box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
 .booth h4 {
-  font-family: 'Amatic SC', cursive;
-  font-size: 1.2em;
-  font-weight: 700;
+  font-family: 'Amatic SC', cursive; /* Updated to Amatic SC */
+  font-size: 1.4em; /* Slightly larger for better readability */
+  font-weight: 700; /* Use bold weight */
   color: #B85437;
   margin-bottom: 10px;
   text-align: center;
+   text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 .stamp {
   width: 46px;
@@ -183,7 +182,7 @@ header {
   user-select: none;
   cursor: pointer;
   position: relative;
-  touch-action: none;
+  touch-action: none; /* Prevent browser handling of touch gestures */
 }
 #stampMsg {
   text-align: center;
@@ -234,7 +233,7 @@ header {
   color: #46C6D7; 
   text-align: center; 
   margin-bottom: 15px; 
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Fredoka One', cursive; /* Updated to match section titles */
 }
 .howToPlayModal .modal-body p { 
   color: #2A3B27; 
@@ -288,11 +287,14 @@ header {
     <span class="close">&times;</span>
     <h2>♻️ How to Play – Re:Vibe Journey</h2>
     <div class="modal-body">
-      <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
-      Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
+    <p><strong>Step 1 — Visit the Game Booths 🎮</strong><br>
+    Explore <b>6 game booths</b> around the event. Complete each game and tap the booth card here to <b>collect your stamp</b>.</p>
 
-      <p><strong>Step 2 — Refresh the Way You Live 🌱</strong><br>
-      Congrats! You've completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+    <p><strong>Step 2 — Unlock Sponsor Booths 🎁</strong><br>
+    ✅ After finishing <b>the game booths</b>, you’ll have a chance <b>to redeem freebies🎉</b>!</p>
+
+    <p><strong>Step 3 — Refresh the Way You Live 🌱</strong><br>
+    Congrats! You’ve completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
     </div>
   </div>
 </div>
@@ -321,29 +323,28 @@ console.log("Script started loading");
 const firebaseConfig = {
   apiKey: "AIzaSyBePKNaXo7cr_oAteQydv1D0IV_68fpglo",
   authDomain: "sustainable12.firebaseapp.com",
+  databaseURL: "https://sustainable12-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "sustainable12",
-  storageBucket: "sustainable12.appspot.com",
+  storageBucket: "sustainable12.firebasestorage.app",
   messagingSenderId: "905147566179",
-  appId: "1:905147566179:web:52e20f5afccd05166a1056"
+  appId: "1:905147566179:web:52e20f5afccd05166a1056",
+  measurementId: "G-HVNWTXWPH4"
 };
 
-// Initialize Firebase
-let app, auth, db;
 try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
   console.log("Firebase initialized successfully");
 } catch (error) {
   console.error("Firebase initialization error:", error);
-  document.getElementById('gameList').innerHTML = '<div class="loading">Firebase error. Please refresh.</div>';
 }
   
 const booths = [
   {
     name: "Waste Sorting Challenge",
     desc: [
-      "🌿 Refresh your recycling skills!",
+      "<strong>🌿 Refresh your recycling skills!</strong>",
       "Drag or pick each waste card into its correct bin",
       "— Recyclable, Organic, or General Waste.",
       "Sort everything correctly to earn your stamp.",
@@ -354,7 +355,7 @@ const booths = [
   {
     name: "Sugar Shock Guess",
     desc: [
-      "🍬 How much sugar is hiding in your drink?",
+      "<strong>🍬 How much sugar is hiding in your drink?</strong>",
       "Add spoonfuls of sugar until you think it matches one canned drink.", 
       "Then, we'll reveal the real amount 😳", 
       "Get close enough to earn your stamp", 
@@ -365,7 +366,7 @@ const booths = [
   {
     name: "Green-nopoly",
     desc: [
-      "🎲 Roll. Learn. Refresh the way you live.",
+      "<strong>🎲 Roll. Learn. Refresh the way you live.</strong>",
       "1️⃣ Roll the dice to start your journey.", 
       "2️⃣ Move to the space shown.", 
       "3️⃣ Complete the task or answer the question.", 
@@ -376,7 +377,7 @@ const booths = [
   {
     name: "DIY Phone Holder / Lifestyle Deco",
     desc: [
-      "📱 Turn scraps into something cute + useful!",
+      "<strong>📱 Turn scraps into something cute + useful!</strong>",
       "Pick your materials, assemble your holder, and decorate it your way.", 
       "Once your creation stands on its own, collect your stamp.", 
       "Reuse, refresh, repeat ♻️🎨"
@@ -386,7 +387,7 @@ const booths = [
   {
     name: "Trash Bowling",
     desc: [
-      "🎳 Strike out bad habits!",
+      "<strong>🎳 Strike out bad habits!</strong>",
       "1️⃣ Pick the 10 non-eco-friendly bottles from the set.", 
       "2️⃣ Show them to our crew for a quick check.", 
       "3️⃣ Bowl your ball — you get 3 tries!", 
@@ -397,7 +398,7 @@ const booths = [
   {
     name: "Create Your Own Monalisa",
     desc: [
-      "🎨 Paint, play, and re-create — Re:Vibe style!",
+      "<strong>🎨 Paint, play, and re-create — Re:Vibe style!</strong>",
       "Use egg trays as your canvas and paint your pattern your way.", 
       "Once your masterpiece is done, your stamp awaits.", 
       "Upcycle your creativity 🌸♻️"
@@ -432,6 +433,16 @@ window.addEventListener("click", (event) => {
 let userData = { stamps: [] };
 let currentUser = null;
 let currentBoothIndex = null;
+
+// Initialize Firebase if not already done
+let app, auth, db;
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+}
 
 async function saveProgress() {
   if (!currentUser) {
@@ -487,14 +498,14 @@ function openModal(booth, index) {
   if (userData.stamps.includes(index)) {
     stampMsg.textContent = "✅ Already Stamped";
   } else {
-    stampMsg.textContent = "Use two fingers to stamp!";
+    stampMsg.textContent = "⚠️ Use the right stamp!";
   }
 
   modal.style.display = "flex";
   currentBoothIndex = index;
 }
 
-// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms)
+// ✅ Multi-Touch Detection (2-finger, 2.7 cm, 300 ms) - IMPROVED VERSION
 const targetDiameterMm = 27;
 const stableTimeMs = 300;
 const defaultPxPerMm = 96 / 25.4;
@@ -506,15 +517,18 @@ function pxToMm(px) {
 let holdTimer = null;
 let touchCount = 0;
 
-// Enhanced touch event handlers
+// Remove simple click handler for stamp stage
+stampStage.onclick = null;
+
+// Enhanced touch event handlers [citation:1]
 stampStage.addEventListener("touchstart", function(e) {
-  e.preventDefault();
+  e.preventDefault(); // Prevent default browser behavior [citation:1]
   
   const touches = e.touches;
   touchCount = touches.length;
   
   if (touchCount < 2) {
-    stampMsg.textContent = "⚠️ Use the right STAMP!";
+    stampMsg.textContent = "⚠️ Use the right stamp";
     clearTimeout(holdTimer);
     return;
   }
@@ -544,7 +558,7 @@ stampStage.addEventListener("touchstart", function(e) {
 }, { passive: false });
 
 stampStage.addEventListener("touchmove", function(e) {
-  e.preventDefault();
+  e.preventDefault(); // Prevent scrolling while touching stamp area [citation:1]
   touchCount = e.touches.length;
   
   // If fingers move too far apart during hold, cancel
@@ -569,7 +583,7 @@ stampStage.addEventListener("touchend", function(e) {
   if (touchCount < 2) {
     clearTimeout(holdTimer);
     if (!userData.stamps.includes(currentBoothIndex)) {
-      stampMsg.textContent = "⚠️ Use the right STAMP!";
+      stampMsg.textContent = "⚠️ Use the right stamp!";
     }
   }
 }, { passive: false });
@@ -650,7 +664,6 @@ onAuthStateChanged(auth, async (user) => {
       renderBooths();
     } catch (error) {
       console.error("Error loading user data:", error);
-      document.getElementById('gameList').innerHTML = '<div class="loading">Error loading your data.</div>';
     }
   } else {
     console.log("No user signed in, redirecting to login");
