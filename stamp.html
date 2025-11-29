@@ -96,6 +96,16 @@ header {
   border-color: #E1EEAF;
   box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
+.booth.stamped {
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+.booth.stamped:hover {
+  transform: none;
+  border-color: #AFDFEE;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+}
 .booth h4 {
   font-family: 'Amatic SC', cursive;
   font-size: 1.4em;
@@ -119,7 +129,7 @@ header {
   color: #F72967;
   transition: all 0.3s ease;
 }
-.stamped {
+.stamped .stamp {
   background: radial-gradient(circle at center, #46C6D7 0%, #92D1FF 80%);
   border: 2px solid #46C6D7;
   color: #fff;
@@ -266,6 +276,29 @@ header {
   height: auto;
   border-radius: 10px;
 }
+.notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  z-index: 2001;
+  text-align: center;
+  font-family: 'Fredoka One', cursive;
+  color: #46C6D7;
+  border: 3px solid #FFD058;
+  display: none;
+  animation: fadeInOut 3s ease-in-out;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+}
 </style>
 </head>
 <body>
@@ -286,6 +319,11 @@ header {
 
 <!-- 📘 How to Play Button -->
 <button id="howToPlayBtn" class="how-btn">📘 How to Play</button>
+
+<!-- Notification Popup -->
+<div id="notification" class="notification">
+  You have stamped, Please visit other booths
+</div>
 
 <!-- 📘 Instruction Modal -->
 <div id="howToPlayModal" class="howToPlayModal">
@@ -430,6 +468,7 @@ const modalBoothDesc = document.getElementById("modalBoothDesc");
 const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
+const notification = document.getElementById("notification");
 
 const howToPlayBtn = document.getElementById("howToPlayBtn");
 const howToPlayModal = document.getElementById("howToPlayModal");
@@ -470,6 +509,14 @@ async function saveProgress() {
   }
 }
 
+function showNotification(message) {
+  notification.textContent = message;
+  notification.style.display = 'block';
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 3000);
+}
+
 function renderBooths() {
   const gameList = document.getElementById("gameList");
   
@@ -484,11 +531,20 @@ function renderBooths() {
   booths.forEach((b, i) => {
     const stamped = userData.stamps.includes(i);
     const div = document.createElement("div");
-    div.className = "booth";
+    div.className = stamped ? "booth stamped" : "booth";
     const stampSymbol = stamped ? "✓" : "";
-    div.innerHTML = `<h4>${b.name}</h4><div class="stamp ${stamped ? "stamped" : ""}">${stampSymbol}</div>`;
-    div.style.pointerEvents = "auto";
-    div.onclick = () => openModal(b, i);
+    div.innerHTML = `<h4>${b.name}</h4><div class="stamp">${stampSymbol}</div>`;
+    
+    if (stamped) {
+      div.style.pointerEvents = "none"; // Make stamped booths untouchable
+      div.onclick = () => {
+        showNotification("You have stamped, Please visit other booths");
+      };
+    } else {
+      div.style.pointerEvents = "auto";
+      div.onclick = () => openModal(b, i);
+    }
+    
     gameList.appendChild(div);
   });
   
@@ -510,8 +566,13 @@ function openModal(booth, index) {
   if (userData.stamps.includes(index)) {
     // Show the specific stamp image for this booth
     stampMsg.innerHTML = `<img src="${booth.stampImage}" class="stamp-image" alt="Stamp">`;
+    // Disable stamping for already stamped booths
+    stampStage.style.pointerEvents = "none";
+    stampStage.style.cursor = "not-allowed";
   } else {
     stampMsg.textContent = "Stamp here!";
+    stampStage.style.pointerEvents = "auto";
+    stampStage.style.cursor = "pointer";
   }
 
   modal.style.display = "flex";
@@ -535,6 +596,12 @@ stampStage.onclick = null;
 
 // Enhanced touch event handlers
 stampStage.addEventListener("touchstart", function(e) {
+  // Check if booth is already stamped
+  if (currentBoothIndex !== null && userData.stamps.includes(currentBoothIndex)) {
+    showNotification("You have stamped, Please visit other booths");
+    return;
+  }
+  
   e.preventDefault();
   
   const touches = e.touches;
@@ -571,6 +638,11 @@ stampStage.addEventListener("touchstart", function(e) {
 }, { passive: false });
 
 stampStage.addEventListener("touchmove", function(e) {
+  // Check if booth is already stamped
+  if (currentBoothIndex !== null && userData.stamps.includes(currentBoothIndex)) {
+    return;
+  }
+  
   e.preventDefault();
   touchCount = e.touches.length;
   
@@ -590,6 +662,11 @@ stampStage.addEventListener("touchmove", function(e) {
 }, { passive: false });
 
 stampStage.addEventListener("touchend", function(e) {
+  // Check if booth is already stamped
+  if (currentBoothIndex !== null && userData.stamps.includes(currentBoothIndex)) {
+    return;
+  }
+  
   e.preventDefault();
   touchCount = e.touches.length;
   
