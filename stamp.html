@@ -195,6 +195,11 @@ header {
   position: relative;
   touch-action: none;
 }
+#stampStage.stamped {
+  cursor: not-allowed;
+  pointer-events: none;
+  background-color: #e6f7ff;
+}
 #stampMsg {
   text-align: center;
   font-size: 1em;
@@ -567,10 +572,12 @@ function openModal(booth, index) {
     // Show the specific stamp image for this booth
     stampMsg.innerHTML = `<img src="${booth.stampImage}" class="stamp-image" alt="Stamp">`;
     // Disable stamping for already stamped booths
+    stampStage.classList.add('stamped');
     stampStage.style.pointerEvents = "none";
     stampStage.style.cursor = "not-allowed";
   } else {
     stampMsg.textContent = "Stamp here!";
+    stampStage.classList.remove('stamped');
     stampStage.style.pointerEvents = "auto";
     stampStage.style.cursor = "pointer";
   }
@@ -598,8 +605,7 @@ stampStage.onclick = null;
 stampStage.addEventListener("touchstart", function(e) {
   // Check if booth is already stamped
   if (currentBoothIndex !== null && userData.stamps.includes(currentBoothIndex)) {
-    showNotification("You have stamped, Please visit other booths");
-    return;
+    return; // Don't show any message for stamped booths
   }
   
   e.preventDefault();
@@ -640,7 +646,7 @@ stampStage.addEventListener("touchstart", function(e) {
 stampStage.addEventListener("touchmove", function(e) {
   // Check if booth is already stamped
   if (currentBoothIndex !== null && userData.stamps.includes(currentBoothIndex)) {
-    return;
+    return; // Don't show any message for stamped booths
   }
   
   e.preventDefault();
@@ -664,7 +670,7 @@ stampStage.addEventListener("touchmove", function(e) {
 stampStage.addEventListener("touchend", function(e) {
   // Check if booth is already stamped
   if (currentBoothIndex !== null && userData.stamps.includes(currentBoothIndex)) {
-    return;
+    return; // Don't show any message for stamped booths
   }
   
   e.preventDefault();
@@ -703,19 +709,22 @@ function applyStamp() {
   // Show the specific stamp image for this booth instead of text
   stampMsg.innerHTML = `<img src="${booths[currentBoothIndex].stampImage}" class="stamp-image" alt="Stamp">`;
 
+  // Make stamp stage untouchable after successful stamp
+  stampStage.classList.add('stamped');
+  stampStage.style.pointerEvents = "none";
+  stampStage.style.cursor = "not-allowed";
+
   // Animate the stamping stage
   stampStage.style.animation = "pulseGlow 1.5s ease-in-out";
   setTimeout(() => {
     stampStage.style.animation = "";
   }, 1500);
 
-  // Update the UI
+  // Update the UI - modal stays open for user to see the stamped image
   renderBooths();
   
-  // Auto-close modal after short delay
-  setTimeout(() => {
-    modal.style.display = "none";
-  }, 1200);
+  // REMOVED: Auto-close modal after short delay
+  // Users can now close the modal manually by clicking the X or outside
 }
 
 // Close modal handlers
