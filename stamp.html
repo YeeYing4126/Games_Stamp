@@ -97,14 +97,14 @@ header {
   box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
 .booth.stamped {
-  cursor: not-allowed;
-  opacity: 0.7;
+  cursor: pointer;
+  opacity: 1;
   transform: none;
 }
 .booth.stamped:hover {
-  transform: none;
-  border-color: #AFDFEE;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  transform: translateY(-4px);
+  border-color: #E1EEAF;
+  box-shadow: 0 6px 15px rgba(85,115,141,0.25);
 }
 .booth h4 {
   font-family: 'Amatic SC', cursive;
@@ -298,11 +298,62 @@ header {
   display: none;
   animation: fadeInOut 3s ease-in-out;
 }
+.completion-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(145deg, #FFE485, #FFD058);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  z-index: 2002;
+  text-align: center;
+  font-family: 'Gaegu', cursive;
+  color: #B85437;
+  border: 4px solid #46C6D7;
+  max-width: 400px;
+  width: 90%;
+  display: none;
+  animation: popIn 0.5s ease-out;
+}
+.completion-popup h2 {
+  font-family: 'Fredoka One', cursive;
+  color: #ff7aa2;
+  margin-bottom: 15px;
+  font-size: 1.8rem;
+}
+.completion-popup p {
+  margin: 10px 0;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+.completion-popup .close-btn {
+  background: #46C6D7;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 15px;
+  font-family: 'Gaegu', cursive;
+  transition: all 0.3s ease;
+}
+.completion-popup .close-btn:hover {
+  background: #3ab0c1;
+  transform: scale(1.05);
+}
 @keyframes fadeInOut {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
   20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+}
+@keyframes popIn {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+  70% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 </style>
 </head>
@@ -328,6 +379,14 @@ header {
 <!-- Notification Popup -->
 <div id="notification" class="notification">
   You have stamped, Please visit other booths
+</div>
+
+<!-- Completion Popup -->
+<div id="completionPopup" class="completion-popup">
+  <h2>🎉 Congratulations! 🎉</h2>
+  <p>Congrats! You've completed your <b>Re:Vibe Journey</b> — proving that sustainability can be fun and rewarding 💚</p>
+  <p>Come to visit our registration booth for Lucky Draw!🍀<br>You don't want to miss it! 🤩</p>
+  <button class="close-btn">Awesome! 🎊</button>
 </div>
 
 <!-- 📘 Instruction Modal -->
@@ -474,6 +533,8 @@ const stampStage = document.getElementById("stampStage");
 const stampMsg = document.getElementById("stampMsg");
 const stampSound = document.getElementById("stampSound");
 const notification = document.getElementById("notification");
+const completionPopup = document.getElementById("completionPopup");
+const completionCloseBtn = completionPopup.querySelector(".close-btn");
 
 const howToPlayBtn = document.getElementById("howToPlayBtn");
 const howToPlayModal = document.getElementById("howToPlayModal");
@@ -485,6 +546,11 @@ howToPlayClose.onclick = () => howToPlayModal.style.display = "none";
 window.addEventListener("click", (event) => {
   if (event.target === howToPlayModal) howToPlayModal.style.display = "none";
 });
+
+// Completion popup handler
+completionCloseBtn.onclick = () => {
+  completionPopup.style.display = "none";
+};
 
 let userData = { stamps: [] };
 let currentUser = null;
@@ -522,6 +588,21 @@ function showNotification(message) {
   }, 3000);
 }
 
+function showCompletionPopup() {
+  completionPopup.style.display = 'block';
+}
+
+function checkCompletion() {
+  // Check if all booths are stamped
+  if (userData.stamps.length === booths.length) {
+    console.log("All booths completed! Showing completion popup.");
+    // Show completion popup after a short delay
+    setTimeout(() => {
+      showCompletionPopup();
+    }, 500);
+  }
+}
+
 function renderBooths() {
   const gameList = document.getElementById("gameList");
   
@@ -540,15 +621,9 @@ function renderBooths() {
     const stampSymbol = stamped ? "✓" : "";
     div.innerHTML = `<h4>${b.name}</h4><div class="stamp">${stampSymbol}</div>`;
     
-    if (stamped) {
-      div.style.pointerEvents = "none"; // Make stamped booths untouchable
-      div.onclick = () => {
-        showNotification("You have stamped, Please visit other booths");
-      };
-    } else {
-      div.style.pointerEvents = "auto";
-      div.onclick = () => openModal(b, i);
-    }
+    // Make ALL booths clickable, including stamped ones
+    div.style.pointerEvents = "auto";
+    div.onclick = () => openModal(b, i);
     
     gameList.appendChild(div);
   });
@@ -723,8 +798,8 @@ function applyStamp() {
   // Update the UI - modal stays open for user to see the stamped image
   renderBooths();
   
-  // REMOVED: Auto-close modal after short delay
-  // Users can now close the modal manually by clicking the X or outside
+  // Check if all booths are completed
+  checkCompletion();
 }
 
 // Close modal handlers
@@ -755,6 +830,9 @@ onAuthStateChanged(auth, async (user) => {
           userData.hasSeenHowToPlay = true;
           await setDoc(docRef, userData);
         }
+        
+        // Check if user has already completed all booths
+        checkCompletion();
       } else {
         console.log("No existing user data, creating new document");
         userData = { stamps: [], hasSeenHowToPlay: true };
