@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Re:Vibe Opening Ceremony</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+    
+    body {
+      font-family: 'Gaegu', cursive;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #FFE485 0%, #FFD058 25%, #AFDFEE 50%, #92D1FF 75%, #E1EEAF 100%);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .stamp-container {
+      width: 100%;
+      max-width: 400px;
+      height: 400px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .stamp-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFD3E4 30%, #FFE485 100%);
+      border: 6px solid #46C6D7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      z-index: 10;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(70, 198, 215, 0.4);
+    }
+    
+    .stamp-circle.active {
+      background: radial-gradient(circle, #46C6D7 30%, #92D1FF 100%);
+      border-color: #FFE485;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 20px 5px rgba(70, 198, 215, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 30px 10px rgba(246, 152, 219, 0.6); }
+      100% { transform: scale(1); box-shadow: 0 0 20px 5px rgba(70, 198, 215, 0.4); }
+    }
+    
+    .stamp-circle .icon {
+      font-size: 3.5rem;
+      color: #ff7aa2;
+      margin-bottom: 10px;
+    }
+    
+    .stamp-circle .text {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: #B85437;
+      text-align: center;
+      padding: 0 15px;
+    }
+    
+    .status {
+      margin-top: 30px;
+      font-size: 1.3rem;
+      color: #46C6D7;
+      text-align: center;
+      font-weight: bold;
+      min-height: 30px;
+      transition: all 0.3s ease;
+    }
+    
+    .celebration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .celebration-logo {
+      max-width: 250px;
+      height: auto;
+      margin-bottom: 20px;
+      animation: float 2s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .celebration-text {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.8rem;
+      color: #ff7aa2;
+      text-align: center;
+      text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow {
+      from { text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 122, 162, 0.5); }
+      to { text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 122, 162, 0.8); }
+    }
+    
+    .countdown {
+      font-size: 1.8rem;
+      color: #46C6D7;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    
+    /* Simple touch indicators */
+    .touch-indicator {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 122, 162, 0.7);
+      position: absolute;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      z-index: 5;
+    }
+    
+    .touch-indicator.active {
+      display: flex;
+      transform: scale(1);
+    }
+    
+    /* Confetti */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+      z-index: 99;
+    }
+    
+    @media (max-width: 600px) {
+      .stamp-circle {
+        width: 180px;
+        height: 180px;
+      }
+      
+      .celebration-text {
+        font-size: 2.2rem;
+      }
+      
+      .celebration-logo {
+        max-width: 200px;
+      }
+    }
+    
+    /* Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu&display=swap');
+  </style>
+</head>
+<body>
+  <div class="stamp-container">
+    <div class="stamp-circle" id="stampCircle">
+      <div class="icon">🎯</div>
+      <div class="text">OFFICIAL STAMP</div>
+      <div class="touch-indicator" id="touch1">•</div>
+      <div class="touch-indicator" id="touch2">•</div>
+    </div>
+    <div class="status" id="statusMessage"></div>
+  </div>
+  
+  <div class="celebration" id="celebration">
+    <img src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/ReVibe%20Logo_Transparent%20Background.png" alt="Re:Vibe Logo" class="celebration-logo">
+    <div class="celebration-text">RE:VIBE LAUNCHED!</div>
+    <div class="countdown" id="countdown">10</div>
+  </div>
+  
+  <script>
+    // Configuration
+    const TARGET_DIAMETER_MM = 27; // 2.7 cm
+    const STABLE_TIME_MS = 3000; // 3 seconds
+    const CELEBRATION_DURATION = 10000; // 10 seconds
+    
+    // DOM Elements
+    const stampCircle = document.getElementById('stampCircle');
+    const statusMessage = document.getElementById('statusMessage');
+    const celebration = document.getElementById('celebration');
+    const countdownElement = document.getElementById('countdown');
+    const touch1 = document.getElementById('touch1');
+    const touch2 = document.getElementById('touch2');
+    
+    // Variables
+    let holdTimer = null;
+    let touchCount = 0;
+    let celebrationTimer = null;
+    let countdownTimer = null;
+    let timeRemaining = CELEBRATION_DURATION / 1000;
+    let isStamped = false;
+    
+    // Convert mm to pixels
+    const defaultPxPerMm = 96 / 25.4;
+    
+    function pxToMm(px) {
+      return px / defaultPxPerMm;
+    }
+    
+    function getDistance(touch1, touch2) {
+      const dx = touch1.clientX - touch2.clientX;
+      const dy = touch1.clientY - touch2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    function updateTouchIndicators(touches) {
+      // Reset
+      touch1.classList.remove('active');
+      touch2.classList.remove('active');
+      
+      // Update position and show indicators
+      if (touches.length >= 1) {
+        const rect = stampCircle.getBoundingClientRect();
+        touch1.style.left = (touches[0].clientX - rect.left - 30) + 'px';
+        touch1.style.top = (touches[0].clientY - rect.top - 30) + 'px';
+        touch1.classList.add('active');
+      }
+      
+      if (touches.length >= 2) {
+        const rect = stampCircle.getBoundingClientRect();
+        touch2.style.left = (touches[1].clientX - rect.left - 30) + 'px';
+        touch2.style.top = (touches[1].clientY - rect.top - 30) + 'px';
+        touch2.classList.add('active');
+      }
+    }
+    
+    function showCelebration() {
+      if (isStamped) return;
+      
+      isStamped = true;
+      stampCircle.classList.add('active');
+      
+      // Create initial confetti
+      createConfetti();
+      
+      // Show celebration
+      celebration.style.display = 'flex';
+      startCountdown();
+      
+      // Create more confetti over time
+      for (let i = 0; i < 30; i++) {
+        setTimeout(() => createConfetti(), i * 300);
+      }
+    }
+    
+    function startCountdown() {
+      timeRemaining = CELEBRATION_DURATION / 1000;
+      countdownElement.textContent = timeRemaining;
+      
+      countdownTimer = setInterval(() => {
+        timeRemaining--;
+        countdownElement.textContent = timeRemaining;
+        
+        if (timeRemaining <= 0) {
+          endCelebration();
+        }
+      }, 1000);
+      
+      celebrationTimer = setTimeout(endCelebration, CELEBRATION_DURATION);
+    }
+    
+    function endCelebration() {
+      clearInterval(countdownTimer);
+      clearTimeout(celebrationTimer);
+      
+      celebration.style.display = 'none';
+      stampCircle.classList.remove('active');
+      
+      setTimeout(() => {
+        isStamped = false;
+      }, 1000);
+    }
+    
+    function createConfetti() {
+      const colors = ['#FFD058', '#46C6D7', '#ff7aa2', '#E1EEAF', '#AFDFEE'];
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.top = '-10px';
+      document.body.appendChild(confetti);
+      
+      const size = Math.random() * 15 + 5;
+      confetti.style.width = size + 'px';
+      confetti.style.height = size + 'px';
+      confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      
+      const animation = confetti.animate([
+        { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+        { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+      ], {
+        duration: Math.random() * 2000 + 1500,
+        easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
+      });
+      
+      animation.onfinish = () => confetti.remove();
+    }
+    
+    // Event Listeners
+    stampCircle.addEventListener('touchstart', function(e) {
+      if (isStamped) return;
+      
+      e.preventDefault();
+      const touches = Array.from(e.touches);
+      touchCount = touches.length;
+      
+      updateTouchIndicators(touches);
+      
+      if (touchCount < 2) {
+        clearTimeout(holdTimer);
+        return;
+      }
+      
+      const distancePx = getDistance(touches[0], touches[1]);
+      const distanceMm = pxToMm(distancePx);
+      
+      if (distanceMm > TARGET_DIAMETER_MM) {
+        clearTimeout(holdTimer);
+        return;
+      }
+      
+      holdTimer = setTimeout(() => {
+        if (touchCount >= 2) {
+          showCelebration();
+        }
+      }, STABLE_TIME_MS);
+    }, { passive: false });
+    
+    stampCircle.addEventListener('touchmove', function(e) {
+      if (isStamped) return;
+      
+      e.preventDefault();
+      const touches = Array.from(e.touches);
+      touchCount = touches.length;
+      
+      updateTouchIndicators(touches);
+      
+      if (touchCount < 2) {
+        clearTimeout(holdTimer);
+        return;
+      }
+      
+      const distancePx = getDistance(touches[0], touches[1]);
+      const distanceMm = pxToMm(distancePx);
+      
+      if (distanceMm > TARGET_DIAMETER_MM) {
+        clearTimeout(holdTimer);
+      }
+    }, { passive: false });
+    
+    stampCircle.addEventListener('touchend', function(e) {
+      if (isStamped) return;
+      
+      e.preventDefault();
+      const touches = Array.from(e.touches);
+      touchCount = touches.length;
+      
+      updateTouchIndicators(touches);
+      
+      if (touchCount < 2) {
+        clearTimeout(holdTimer);
+      }
+    }, { passive: false });
+    
+    // Initialize
+    statusMessage.textContent = "Two fingers to stamp";
+  </script>
+</body>
+</html>
