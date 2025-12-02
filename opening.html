@@ -19,65 +19,90 @@
       font-family: 'Gaegu', cursive;
       min-height: 100vh;
       background: linear-gradient(135deg, #FFE485 0%, #FFD058 25%, #AFDFEE 50%, #92D1FF 75%, #E1EEAF 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #B85437;
-      text-align: center;
-      overflow: hidden;
-    }
-    
-    .container {
-      width: 90vw;
-      height: 80vh;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 30px;
-      padding: 30px;
-      box-shadow: 0 15px 35px rgba(85, 115, 141, 0.3);
-      border: 5px solid #AFDFEE;
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      color: #B85437;
+      padding: 20px;
+      text-align: center;
+      overflow-x: hidden;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 12px 30px rgba(85, 115, 141, 0.3);
+      border: 5px solid #AFDFEE;
       position: relative;
+      z-index: 10;
+    }
+    
+    header {
+      margin-bottom: 25px;
     }
     
     .logo {
-      max-width: 200px;
+      max-width: 180px;
       height: auto;
-      margin-bottom: 20px;
+      margin: 0 auto 15px;
+      display: block;
       filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
     }
     
     h1 {
       font-family: 'Fredoka One', cursive;
       color: #ff7aa2;
-      font-size: 3rem;
-      margin-bottom: 30px;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
       text-shadow: 2px 2px 0 rgba(255,255,255,0.8);
       letter-spacing: 1px;
     }
     
+    .stamp-area-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 30px 0;
+      padding: 20px;
+    }
+    
     .stamp-circle {
-      width: 280px;
-      height: 280px;
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
       background: radial-gradient(circle, #FFD3E4 30%, #FFE485 100%);
-      border: 10px dashed #46C6D7;
+      border: 8px dashed #46C6D7;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 10px 25px rgba(70, 198, 215, 0.3);
+      box-shadow: 0 8px 20px rgba(70, 198, 215, 0.3);
       position: relative;
       overflow: hidden;
     }
     
+    .stamp-circle:hover {
+      transform: scale(1.03);
+      box-shadow: 0 12px 25px rgba(70, 198, 215, 0.4);
+    }
+    
     .stamp-circle.active {
       background: radial-gradient(circle, #46C6D7 30%, #92D1FF 100%);
-      border: 10px solid #FFE485;
+      border: 8px solid #FFE485;
       animation: pulse 1.5s infinite alternate;
     }
     
@@ -87,9 +112,9 @@
     }
     
     .stamp-circle .icon {
-      font-size: 5rem;
+      font-size: 4rem;
       color: #ff7aa2;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       transition: all 0.3s ease;
     }
     
@@ -100,9 +125,9 @@
     
     .stamp-circle .text {
       font-family: 'Fredoka One', cursive;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       color: #B85437;
-      padding: 0 15px;
+      padding: 0 10px;
       text-align: center;
     }
     
@@ -111,15 +136,15 @@
     }
     
     .touch-indicator {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       background: rgba(255, 122, 162, 0.8);
       position: absolute;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: white;
       opacity: 0;
       transform: scale(0);
@@ -133,11 +158,11 @@
     }
     
     .progress-bar {
-      width: 300px;
-      height: 12px;
+      width: 100%;
+      height: 10px;
       background: #AFDFEE;
-      border-radius: 6px;
-      margin-top: 30px;
+      border-radius: 5px;
+      margin-top: 20px;
       overflow: hidden;
       display: none;
     }
@@ -146,27 +171,26 @@
       height: 100%;
       background: linear-gradient(90deg, #FFD058, #46C6D7, #ff7aa2);
       width: 0%;
-      border-radius: 6px;
+      border-radius: 5px;
       transition: width 0.1s linear;
     }
     
     .status-message {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      min-height: 40px;
+      margin-top: 15px;
+      font-size: 1.3rem;
+      min-height: 30px;
       color: #46C6D7;
       font-weight: bold;
       transition: all 0.3s ease;
     }
     
-    /* Celebration Page */
     .celebration-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #FFE485 0%, #FFD058 25%, #AFDFEE 50%, #92D1FF 75%, #E1EEAF 100%);
+      background: rgba(255, 255, 255, 0.95);
       display: none;
       flex-direction: column;
       align-items: center;
@@ -181,117 +205,100 @@
     }
     
     .celebration-logo {
-      max-width: 400px;
+      max-width: 300px;
       height: auto;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       animation: float 3s ease-in-out infinite;
-      filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2));
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
     }
     
     @keyframes float {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-20px) scale(1.05); }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
     }
     
     .celebration-text {
       font-family: 'Fredoka One', cursive;
-      font-size: 4.5rem;
+      font-size: 3.5rem;
       color: #ff7aa2;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
       text-align: center;
-      text-shadow: 4px 4px 0 rgba(255, 255, 255, 0.8);
+      text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.8);
       animation: textGlow 2s ease-in-out infinite alternate;
     }
     
     @keyframes textGlow {
-      from { text-shadow: 4px 4px 0 rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 122, 162, 0.5); }
-      to { text-shadow: 4px 4px 0 rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 122, 162, 0.8); }
+      from { text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 122, 162, 0.5); }
+      to { text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 122, 162, 0.8); }
     }
     
     .countdown {
-      font-size: 3rem;
+      font-size: 2rem;
       color: #46C6D7;
       font-weight: bold;
-      margin-top: 30px;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 15px 40px;
-      border-radius: 50px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      margin-top: 20px;
     }
     
     .confetti {
-      position: absolute;
-      width: 20px;
-      height: 20px;
+      position: fixed;
+      width: 15px;
+      height: 15px;
       opacity: 0;
-      z-index: 99;
+      z-index: 101;
       pointer-events: none;
     }
     
-    /* Landscape orientation specific */
-    @media (orientation: landscape) {
+    @media (max-width: 600px) {
       .container {
-        flex-direction: row;
-        justify-content: space-around;
-        padding: 40px;
-      }
-      
-      .logo {
-        max-width: 180px;
-        margin-bottom: 0;
-        margin-right: 40px;
+        padding: 20px;
+        margin: 10px;
       }
       
       h1 {
-        position: absolute;
-        top: 30px;
-        font-size: 2.8rem;
+        font-size: 2rem;
       }
       
       .stamp-circle {
-        width: 250px;
-        height: 250px;
+        width: 180px;
+        height: 180px;
       }
       
-      .stamp-circle .icon {
-        font-size: 4rem;
+      .celebration-text {
+        font-size: 2.5rem;
       }
       
-      .stamp-circle .text {
-        font-size: 1.6rem;
-      }
-      
-      .progress-bar {
-        width: 250px;
+      .celebration-logo {
+        max-width: 250px;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/ReVibe%20Logo_Transparent%20Background.png" alt="Re:Vibe Logo" class="logo">
-    <div>
+    <header>
+      <img src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/ReVibe%20Logo_Transparent%20Background.png" alt="Re:Vibe Logo" class="logo">
       <h1>Opening Ceremony</h1>
-      <div class="stamp-area-container">
-        <div class="stamp-circle" id="stampCircle">
-          <div class="icon">🎯</div>
-          <div class="text">STAMP HERE</div>
-          <div class="touch-indicator" id="touch1">👆</div>
-          <div class="touch-indicator" id="touch2">👇</div>
-        </div>
-        
-        <div class="progress-bar" id="progressBar">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        
-        <div class="status-message" id="statusMessage">
-          Ready to stamp!
-        </div>
+    </header>
+    
+    <div class="stamp-area-container">
+      <div class="stamp-circle" id="stampCircle">
+        <div class="icon">🎯</div>
+        <div class="text">stamp here</div>
+        <div class="touch-indicator" id="touch1">👆</div>
+        <div class="touch-indicator" id="touch2">👇</div>
+      </div>
+      
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      
+      <div class="status-message" id="statusMessage">
+        Touch with two fingers for 3 seconds
       </div>
     </div>
   </div>
   
-  <!-- Celebration Page -->
+  <!-- Celebration Overlay -->
   <div class="celebration-overlay" id="celebrationOverlay">
     <img src="https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/ReVibe%20Logo_Transparent%20Background.png" alt="Re:Vibe Logo" class="celebration-logo">
     <div class="celebration-text">RE:VIBE JOURNEY LAUNCHED!</div>
@@ -323,7 +330,7 @@
     let timeRemaining = CELEBRATION_DURATION / 1000;
     let isStamped = false;
     
-    // Convert mm to pixels
+    // Convert mm to pixels (assuming 96 PPI)
     const defaultPxPerMm = 96 / 25.4;
     
     function pxToMm(px) {
@@ -337,22 +344,22 @@
     }
     
     function updateTouchIndicators(touches) {
-      // Reset indicators
+      // Reset all indicators
       touch1.classList.remove('active');
       touch2.classList.remove('active');
       
       // Show indicators for current touches
       if (touches.length >= 1) {
         const rect = stampCircle.getBoundingClientRect();
-        touch1.style.left = (touches[0].clientX - rect.left - 40) + 'px';
-        touch1.style.top = (touches[0].clientY - rect.top - 40) + 'px';
+        touch1.style.left = (touches[0].clientX - rect.left - 35) + 'px';
+        touch1.style.top = (touches[0].clientY - rect.top - 35) + 'px';
         touch1.classList.add('active');
       }
       
       if (touches.length >= 2) {
         const rect = stampCircle.getBoundingClientRect();
-        touch2.style.left = (touches[1].clientX - rect.left - 40) + 'px';
-        touch2.style.top = (touches[1].clientY - rect.top - 40) + 'px';
+        touch2.style.left = (touches[1].clientX - rect.left - 35) + 'px';
+        touch2.style.top = (touches[1].clientY - rect.top - 35) + 'px';
         touch2.classList.add('active');
       }
     }
@@ -380,20 +387,17 @@
       
       isStamped = true;
       stampCircle.classList.add('active');
-      statusMessage.textContent = "✓ Launching Re:Vibe...";
+      statusMessage.textContent = "✓ Successfully Stamped!";
       statusMessage.style.color = "#46C6D7";
-      progressBar.style.display = 'none';
       
       // Show celebration after a brief delay
       setTimeout(() => {
         celebrationOverlay.style.display = 'flex';
         startCountdown();
         
-        // Create confetti on celebration page
-        for (let i = 0; i < 100; i++) {
-          setTimeout(() => createConfetti(), i * 100);
-        }
-      }, 500);
+        // Start confetti effect
+        startConfetti();
+      }, 800);
     }
     
     function startCountdown() {
@@ -409,6 +413,7 @@
         }
       }, 1000);
       
+      // Auto-end after celebration duration
       celebrationTimer = setTimeout(endCelebration, CELEBRATION_DURATION);
     }
     
@@ -420,28 +425,34 @@
       stampCircle.classList.remove('active');
       progressBar.style.display = 'none';
       
-      statusMessage.textContent = "✓ Re:Vibe Launched!";
-      statusMessage.style.color = "#ff7aa2";
+      statusMessage.textContent = "Touch with two fingers for 3 seconds";
+      statusMessage.style.color = "#46C6D7";
       
-      // Reset after 3 seconds
+      // Reset after a moment
       setTimeout(() => {
         isStamped = false;
-        statusMessage.textContent = "Ready to stamp!";
-        statusMessage.style.color = "#46C6D7";
-      }, 3000);
+      }, 1000);
     }
     
-    function createConfetti() {
+    function startConfetti() {
       const colors = ['#FFD058', '#46C6D7', '#ff7aa2', '#E1EEAF', '#AFDFEE'];
+      
+      // Create lots of confetti during the 10 seconds
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => createConfettiPiece(colors), i * 100);
+      }
+    }
+    
+    function createConfettiPiece(colors) {
       const confetti = document.createElement('div');
       confetti.className = 'confetti';
       confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
       confetti.style.left = Math.random() * 100 + 'vw';
-      confetti.style.top = '-30px';
-      celebrationOverlay.appendChild(confetti);
+      confetti.style.top = '-20px';
+      document.body.appendChild(confetti);
       
-      // Random size and shape
-      const size = Math.random() * 25 + 15;
+      // Random rotation and shape
+      const size = Math.random() * 20 + 10;
       confetti.style.width = size + 'px';
       confetti.style.height = size + 'px';
       confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
@@ -449,7 +460,7 @@
       // Animation
       const animation = confetti.animate([
         { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-        { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+        { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
       ], {
         duration: Math.random() * 3000 + 2000,
         easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)'
@@ -458,7 +469,7 @@
       animation.onfinish = () => confetti.remove();
     }
     
-    // Event Listeners for touch
+    // Event Listeners
     stampCircle.addEventListener('touchstart', function(e) {
       if (isStamped) return;
       
@@ -466,6 +477,7 @@
       const touches = Array.from(e.touches);
       touchCount = touches.length;
       
+      // Update touch indicators
       updateTouchIndicators(touches);
       
       if (touchCount < 2) {
@@ -476,7 +488,7 @@
         return;
       }
       
-      // Check distance
+      // Check distance between two touches
       const distancePx = getDistance(touches[0], touches[1]);
       const distanceMm = pxToMm(distancePx);
       
@@ -488,7 +500,7 @@
         return;
       }
       
-      // Start hold timer
+      // Start the hold timer
       statusMessage.textContent = "Hold steady...";
       statusMessage.style.color = "#46C6D7";
       progressBar.style.display = 'block';
@@ -508,24 +520,25 @@
       const touches = Array.from(e.touches);
       touchCount = touches.length;
       
+      // Update touch indicators
       updateTouchIndicators(touches);
       
       if (touchCount < 2) {
         clearTimeout(holdTimer);
         stopProgressAnimation();
-        statusMessage.textContent = "Keep both fingers";
+        statusMessage.textContent = "Keep both fingers on screen";
         statusMessage.style.color = "#ff7aa2";
         return;
       }
       
-      // Check distance
+      // Check if fingers moved too far apart
       const distancePx = getDistance(touches[0], touches[1]);
       const distanceMm = pxToMm(distancePx);
       
       if (distanceMm > TARGET_DIAMETER_MM) {
         clearTimeout(holdTimer);
         stopProgressAnimation();
-        statusMessage.textContent = "Fingers moved apart";
+        statusMessage.textContent = "Fingers moved too far apart";
         statusMessage.style.color = "#ff7aa2";
       }
     }, { passive: false });
@@ -537,6 +550,7 @@
       const touches = Array.from(e.touches);
       touchCount = touches.length;
       
+      // Update touch indicators
       updateTouchIndicators(touches);
       
       if (touchCount < 2) {
@@ -545,19 +559,19 @@
         progressBar.style.display = 'none';
         
         if (!isStamped) {
-          statusMessage.textContent = "Ready to stamp!";
+          statusMessage.textContent = "Touch with two fingers for 3 seconds";
           statusMessage.style.color = "#46C6D7";
         }
       }
     }, { passive: false });
     
-    // Mouse for desktop testing
+    // Mouse events for testing on desktop
     stampCircle.addEventListener('mousedown', function(e) {
       if (isStamped) return;
       
-      // Simulate two touches for desktop
+      // Simulate two touches for desktop testing
       touchCount = 2;
-      statusMessage.textContent = "Hold steady... (Desktop)";
+      statusMessage.textContent = "Hold steady... (Testing Mode)";
       statusMessage.style.color = "#46C6D7";
       progressBar.style.display = 'block';
       startProgressAnimation();
@@ -573,14 +587,14 @@
       clearTimeout(holdTimer);
       stopProgressAnimation();
       progressBar.style.display = 'none';
-      statusMessage.textContent = "Ready to stamp!";
+      statusMessage.textContent = "Touch with two fingers for 3 seconds";
       statusMessage.style.color = "#46C6D7";
     });
     
     // Initialize
-    statusMessage.textContent = "Ready to stamp!";
+    statusMessage.textContent = "Touch with two fingers for 3 seconds";
     
-    // Preload logo
+    // Preload the logo image
     const logoImg = new Image();
     logoImg.src = "https://raw.githubusercontent.com/yeeying4126/Games_Stamp/main/ReVibe%20Logo_Transparent%20Background.png";
   </script>
